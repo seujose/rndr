@@ -18,12 +18,16 @@ public:
 		void LoadScene();
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		TArray<FString> GetVraySceneInfo();
+		TArray<FString> GetVrayNodeNames();
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void RefreshNodeInfo(FString ParameterName, TArray<float> ParameterValue, FString NodeName);
+		void SetVrayPluginParameter(FString ParameterName, TArray<float> ParameterValue, FString NodeName);
+
+	UFUNCTION(BlueprintCallable, Category = "vray")
+		void GetVrayPluginParameter(FString ParameterName, FString&ParameterValue, FString NodeName);
 
 	VRay::VRayRenderer renderer;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

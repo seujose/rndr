@@ -36,7 +36,7 @@ void AVrayInterface::Tick(float DeltaTime)
 /************************************************************************/
 /* implementations                                                      */
 /************************************************************************/
-void AVrayInterface::RefreshNodeInfo(FString ParameterName, TArray<float> ParameterValue, FString NodeName)
+void AVrayInterface::SetVrayPluginParameter(FString ParameterName, TArray<float> ParameterValue, FString NodeName)
 {
 	vector<string>propertyNames;
 	FString fstringTemp;
@@ -48,8 +48,10 @@ void AVrayInterface::RefreshNodeInfo(FString ParameterName, TArray<float> Parame
 	MtlSingleBRDF GenericMtlSingleBrdf = plugin_cast<MtlSingleBRDF>(GenericMat);
 	BRDFVRayMtl  GenericBRDFVRayMtl = plugin_cast<BRDFVRayMtl>(GenericMtlSingleBrdf.get_brdf());
 	GenericBRDFVRayMtl.setValue(TCHAR_TO_UTF8(*ParameterName), ParameterValue[0]);
-
-	//get properties
+	
+	/************************************************************************/
+	/* list properties                                                      */
+	/************************************************************************/
 	PluginMeta pluginMeta = renderer.getPluginMeta(GenericBRDFVRayMtl.getType());
 	propertyNames = pluginMeta.getPropertyNames();
 	for (size_t i = 0; i < propertyNames.size(); i++)
@@ -73,12 +75,28 @@ void AVrayInterface::RefreshNodeInfo(FString ParameterName, TArray<float> Parame
 	}
 }
 
+
+
+void AVrayInterface::GetVrayPluginParameter(FString ParameterName, FString&ParameterValue, FString NodeName)
+{
+	FString fstringTemp;
+	string stringTemp = TCHAR_TO_UTF8(*NodeName);
+	Node node = renderer.getPlugin<Node>(stringTemp);
+
+	//material
+	Plugin GenericMat = renderer.getPlugin(node.get_material().getName());
+	MtlSingleBRDF GenericMtlSingleBrdf = plugin_cast<MtlSingleBRDF>(GenericMat);
+	BRDFVRayMtl  GenericBRDFVRayMtl = plugin_cast<BRDFVRayMtl>(GenericMtlSingleBrdf.get_brdf());
+	stringTemp=GenericBRDFVRayMtl.getValueAsString(TCHAR_TO_UTF8(*ParameterName));
+	ParameterValue=stringTemp.c_str();
+}
+
 void AVrayInterface::LoadScene()
 {
 	renderer.load("C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
 }
 
-TArray<FString> AVrayInterface::GetVraySceneInfo()
+TArray<FString> AVrayInterface::GetVrayNodeNames()
 {
 	TArray<FString> out;
 	FString temp;
