@@ -40,12 +40,33 @@ void AVrayInterface::RefreshNodeInfo(ARndrNode*RndrNode)
 {
 	//fstringTemp=(stringTemp.c_str());
 	//UE_LOG(LogTemp, Warning, TEXT("node transform(%s)"), *fstringTemp);
+	vector<string>propertyNames;
 	FString fstringTemp;
 	string stringTemp = TCHAR_TO_UTF8(*RndrNode->NodeInfo.NodeName);
 	Node node  = renderer.getPlugin<Node>(stringTemp);
+	//transform
 	RndrNode->NodeInfo.NodeTransform.X = node.get_transform().offset.x;
 	RndrNode->NodeInfo.NodeTransform.Y = node.get_transform().offset.y;
 	RndrNode->NodeInfo.NodeTransform.Z = node.get_transform().offset.z;
+	//material
+	Plugin genericPlugin = renderer.getPlugin(node.get_material().getName());
+	MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(genericPlugin);
+	PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.get_brdf().getType());
+	propertyNames = pluginMeta.getPropertyNames();
+	for (size_t i = 0; i < propertyNames.size(); i++)
+	{
+		//property name
+		fstringTemp = UTF8_TO_TCHAR(propertyNames[i].c_str());
+		RndrNode->NodeInfo.NodeMaterial.PropertyNameBRDF.Push(fstringTemp);
+		//property value
+		stringTemp=mtlSingleBRDF.get_brdf().getValueAsString(propertyNames[i]);
+		fstringTemp = stringTemp.c_str();
+		RndrNode->NodeInfo.NodeMaterial.PropertyValueBRDF.Push(fstringTemp);
+		//property type
+		stringTemp = mtlSingleBRDF.get_brdf().getValue(propertyNames[i]).getStringType();
+		fstringTemp = stringTemp.c_str();
+		RndrNode->NodeInfo.NodeMaterial.type.Push(fstringTemp);
+	}
 }
 
 void AVrayInterface::LoadScene()
@@ -53,7 +74,7 @@ void AVrayInterface::LoadScene()
 	renderer.load("C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
 }
 
-TArray<FString> AVrayInterface::GetPluginsInfo()
+TArray<FString> AVrayInterface::GetVraySceneInfo()
 {
 	TArray<FString> out;
 	FString temp;

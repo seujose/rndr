@@ -18,7 +18,7 @@ public:
 		void LoadScene();
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		TArray<FString> GetPluginsInfo();
+		TArray<FString> GetVraySceneInfo();
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void RefreshNodeInfo(ARndrNode*RndrNode);
