@@ -21,7 +21,7 @@ public:
 		TArray<FString> GetVraySceneInfo();
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void RefreshNodeInfo(ARndrNode*RndrNode);
+		void RefreshNodeInfo(FString ParameterName, TArray<float> ParameterValue, FString NodeName);
 
 	VRay::VRayRenderer renderer;
 protected:

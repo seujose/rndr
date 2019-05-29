@@ -36,36 +36,40 @@ void AVrayInterface::Tick(float DeltaTime)
 /************************************************************************/
 /* implementations                                                      */
 /************************************************************************/
-void AVrayInterface::RefreshNodeInfo(ARndrNode*RndrNode)
+void AVrayInterface::RefreshNodeInfo(FString ParameterName, TArray<float> ParameterValue, FString NodeName)
 {
-	//fstringTemp=(stringTemp.c_str());
-	//UE_LOG(LogTemp, Warning, TEXT("node transform(%s)"), *fstringTemp);
 	vector<string>propertyNames;
 	FString fstringTemp;
-	string stringTemp = TCHAR_TO_UTF8(*RndrNode->NodeInfo.NodeName);
+	string stringTemp = TCHAR_TO_UTF8(*NodeName);
 	Node node  = renderer.getPlugin<Node>(stringTemp);
-	//transform
-	RndrNode->NodeInfo.NodeTransform.X = node.get_transform().offset.x;
-	RndrNode->NodeInfo.NodeTransform.Y = node.get_transform().offset.y;
-	RndrNode->NodeInfo.NodeTransform.Z = node.get_transform().offset.z;
+	
 	//material
-	Plugin genericPlugin = renderer.getPlugin(node.get_material().getName());
-	MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(genericPlugin);
-	PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.get_brdf().getType());
+	Plugin GenericMat = renderer.getPlugin(node.get_material().getName());
+	MtlSingleBRDF GenericMtlSingleBrdf = plugin_cast<MtlSingleBRDF>(GenericMat);
+	BRDFVRayMtl  GenericBRDFVRayMtl = plugin_cast<BRDFVRayMtl>(GenericMtlSingleBrdf.get_brdf());
+	GenericBRDFVRayMtl.setValue(TCHAR_TO_UTF8(*ParameterName), ParameterValue[0]);
+
+	//get properties
+	PluginMeta pluginMeta = renderer.getPluginMeta(GenericBRDFVRayMtl.getType());
 	propertyNames = pluginMeta.getPropertyNames();
 	for (size_t i = 0; i < propertyNames.size(); i++)
 	{
 		//property name
 		fstringTemp = UTF8_TO_TCHAR(propertyNames[i].c_str());
-		RndrNode->NodeInfo.NodeMaterial.PropertyNameBRDF.Push(fstringTemp);
+		//RndrNode->NodeInfo.NodeMaterial.PropertyNameBRDF.Push(fstringTemp);
+		UE_LOG(LogTemp, Warning, TEXT("property name(%s)"), *fstringTemp);
+
 		//property value
-		stringTemp=mtlSingleBRDF.get_brdf().getValueAsString(propertyNames[i]);
+		stringTemp=GenericBRDFVRayMtl.getValueAsString(propertyNames[i]);
 		fstringTemp = stringTemp.c_str();
-		RndrNode->NodeInfo.NodeMaterial.PropertyValueBRDF.Push(fstringTemp);
+		//RndrNode->NodeInfo.NodeMaterial.PropertyValueBRDF.Push(fstringTemp);
+		UE_LOG(LogTemp, Warning, TEXT("property value(%s)"), *fstringTemp);
+
 		//property type
-		stringTemp = mtlSingleBRDF.get_brdf().getValue(propertyNames[i]).getStringType();
+		stringTemp = GenericBRDFVRayMtl.getValue(propertyNames[i]).getStringType();
 		fstringTemp = stringTemp.c_str();
-		RndrNode->NodeInfo.NodeMaterial.type.Push(fstringTemp);
+		//RndrNode->NodeInfo.NodeMaterial.type.Push(fstringTemp);
+		UE_LOG(LogTemp, Warning, TEXT("property type(%s)"), *fstringTemp);
 	}
 }
 
