@@ -44,11 +44,42 @@ void AVrayInterface::SetVrayPluginParameter(FString ParameterName, TArray<float>
 	GenericBRDFVRayMtl.setValue(TCHAR_TO_UTF8(*ParameterName), ParameterValue[0]);
 }
 
-void AVrayInterface::GetVrayPluginParameter(TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue)
+void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue)
 { 
+	Plugin plugin;
+	switch (PluginType)
+	{
+	case EVrayPluginType::ENode:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		plugin = node;
+	}
+		break;
+	case EVrayPluginType::EMaterial:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		plugin = mtlSingleBRDF;
+	}
+		break;
+	case EVrayPluginType::EBRDF:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
+		plugin = bRDFVRayMtl;
+	}
+		break;
+	case EVrayPluginType::ELight:
+		break;
+	case EVrayPluginType::EGeneric:
+		break;
+	default:
+		break;
+	}
 
-	Plugin plugin = renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
 	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), boolean).getType();
+
 	
 	if (boolean)
 	{
