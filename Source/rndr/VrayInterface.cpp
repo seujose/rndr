@@ -49,6 +49,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FVector>&transformOut, FStrin
 
 	Plugin plugin = renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
 	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), boolean).getType();
+	
 	if (boolean)
 	{
 	switch (paramType)
