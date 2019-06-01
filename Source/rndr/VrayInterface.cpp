@@ -46,6 +46,7 @@ void AVrayInterface::SetVrayPluginParameter(FString ParameterName, TArray<float>
 
 void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue)
 { 
+	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
 	switch (PluginType)
 	{
