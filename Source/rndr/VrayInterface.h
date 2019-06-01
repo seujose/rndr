@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene();
 
+	UFUNCTION(BlueprintCallable, Category = "vray")
+		void Render(int option);
+
 	UFUNCTION(BlueprintPure, Category = "vray")
 		TArray<FString> GetVrayNodeNames();
 

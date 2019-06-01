@@ -348,6 +348,23 @@ void AVrayInterface::LoadScene()
 	renderer.load("C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
 }
 
+void AVrayInterface::Render(int option)
+{
+	switch (option)
+	{
+		case 0:
+		{
+			renderer.startSync();
+		}
+		break;
+		case 1:
+		{
+
+		}
+		break;
+	}
+}
+
 TArray<FString> AVrayInterface::GetVrayNodeNames()
 {
 	TArray<FString> out;
