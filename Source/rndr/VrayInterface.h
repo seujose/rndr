@@ -39,7 +39,7 @@ public:
 		void GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType);
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void SetVrayPluginParameter(FString ParameterName, TArray<float> ParameterValue, FString NodeName);
+		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue);
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue);

@@ -30,18 +30,154 @@ void AVrayInterface::Tick(float DeltaTime)
 /************************************************************************/
 /* implementations                                                      */
 /************************************************************************/
-void AVrayInterface::SetVrayPluginParameter(FString ParameterName, TArray<float> ParameterValue, FString NodeName)
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue)
 {
-	vector<string>propertyNames;
-	FString fstringTemp;
-	string stringTemp = TCHAR_TO_UTF8(*NodeName);
-	Node node  = renderer.getPlugin<Node>(stringTemp);
+	ParamSetSuccessfully = false;
+	Plugin plugin;
+	switch (PluginType)
+	{
+	case EVrayPluginType::ENode:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		plugin = node;
+	}
+	break;
+	case EVrayPluginType::EMaterial:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		plugin = mtlSingleBRDF;
+	}
+	break;
+	case EVrayPluginType::EBRDF:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
+		plugin = bRDFVRayMtl;
+	}
+	break;
+	case EVrayPluginType::ELight:
+		break;
+	case EVrayPluginType::EGeneric:
+		break;
+	default:
+		break;
+	}
 
-	//material
-	Plugin GenericMat = renderer.getPlugin(node.get_material().getName());
-	MtlSingleBRDF GenericMtlSingleBrdf = plugin_cast<MtlSingleBRDF>(GenericMat);
-	BRDFVRayMtl  GenericBRDFVRayMtl = plugin_cast<BRDFVRayMtl>(GenericMtlSingleBrdf.get_brdf());
-	GenericBRDFVRayMtl.setValue(TCHAR_TO_UTF8(*ParameterName), ParameterValue[0]);
+	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), boolean).getType();
+
+
+	if (boolean)
+	{
+		switch (paramType)
+		{
+		case VRay::TYPE_INT:
+		{
+			intIn = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getInt();
+		}
+		break;
+		case VRay::TYPE_FLOAT:
+		{
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), floatArrayIn[0]));
+		}
+		break;
+		case VRay::TYPE_DOUBLE:
+			break;
+		case VRay::TYPE_BOOL:
+			break;
+		case VRay::TYPE_VECTOR:
+			break;
+		case VRay::TYPE_COLOR:
+		{
+			Color color = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getColor();
+			colorIn.R = color.r;
+			colorIn.G = color.g;
+			colorIn.B = color.b;
+		}
+		break;
+		case VRay::TYPE_ACOLOR:
+		{
+			AColor acolor = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getAColor();
+			colorIn.R = acolor.color.r;
+			colorIn.G = acolor.color.g;
+			colorIn.B = acolor.color.b;
+			colorIn.A = acolor.alpha;
+		}
+		break;
+		case VRay::TYPE_MATRIX:
+			break;
+		case VRay::TYPE_TRANSFORM:
+		{
+		}
+		break;
+		case VRay::TYPE_STRING:
+			break;
+		case VRay::TYPE_PLUGIN:
+			break;
+		case VRay::TYPE_TEXTURE:
+			break;
+		case VRay::TYPE_LIST:
+			break;
+		case VRay::TYPE_TEXTUREFLOAT:
+			break;
+		case VRay::TYPE_TEXTUREINT:
+			break;
+		case VRay::TYPE_TEXTUREVECTOR:
+			break;
+		case VRay::TYPE_TEXTUREMATRIX:
+			break;
+		case VRay::TYPE_TEXTURETRANSFORM:
+			break;
+			//case VRay::TYPE_GENERAL_LIST:
+				//break;
+		case VRay::TYPE_INT_LIST:
+			break;
+		case VRay::TYPE_FLOAT_LIST:
+			break;
+		case VRay::TYPE_BOOL_LIST:
+			break;
+		case VRay::TYPE_VECTOR_LIST:
+			break;
+		case VRay::TYPE_COLOR_LIST:
+			break;
+		case VRay::TYPE_STRING_LIST:
+			break;
+		case VRay::TYPE_PLUGIN_LIST:
+			break;
+		case VRay::TYPE_TEXTURE_LIST:
+			break;
+		case VRay::TYPE_TEXTUREFLOAT_LIST:
+			break;
+		case VRay::TYPE_TEXTUREMATRIX_LIST:
+			break;
+		case VRay::TYPE_TEXTURETRANSFORM_LIST:
+			break;
+		case VRay::TYPE_OUTPUTTEXTURE:
+			break;
+		case VRay::TYPE_OUTPUTTEXTUREFLOAT:
+			break;
+		case VRay::TYPE_OUTPUTTEXTUREINT:
+			break;
+		case VRay::TYPE_OUTPUTTEXTUREVECTOR:
+			break;
+		case VRay::TYPE_OUTPUTTEXTUREMATRIX:
+			break;
+		case VRay::TYPE_OUTPUTTEXTURETRANSFORM:
+			break;
+		case VRay::TYPE_UNSPECIFIED:
+			break;
+		case VRay::TYPE_ERROR:
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("param not found"));
+	}
+	 
 }
 
 void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue)
