@@ -13,6 +13,7 @@ enum class EVrayPluginType : uint8
 	EMaterial UMETA(DisplayName = "Material"),
 	EBRDF UMETA(DisplayName = "BRDF"),
 	ELight UMETA(DisplayName = "Light"), 
+	ECamera UMETA(DisplayName = "Camera"),
 	EGeneric UMETA(DisplayName = "Generic")
 };
 
@@ -45,7 +46,9 @@ public:
 		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue);
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue);
+		void GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
+			FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,
+			FString&ParameterValue);
 	
 	
 

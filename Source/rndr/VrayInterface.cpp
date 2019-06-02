@@ -41,14 +41,14 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		plugin = node;
 	}
-	break;
+		break;
 	case EVrayPluginType::EMaterial:
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 		plugin = mtlSingleBRDF;
 	}
-	break;
+		break;
 	case EVrayPluginType::EBRDF:
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
@@ -56,8 +56,14 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
 		plugin = bRDFVRayMtl;
 	}
-	break;
+		break;
 	case EVrayPluginType::ELight:
+		break;
+	case EVrayPluginType::ECamera:
+	{
+		RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
+		plugin = renderView;
+	}
 		break;
 	case EVrayPluginType::EGeneric:
 		break;
@@ -180,7 +186,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	 
 }
 
-void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&boolean, FString ParameterName, FString&ParameterValue)
+void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
 { 
 	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
@@ -215,10 +221,10 @@ void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<F
 		break;
 	}
 
-	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), boolean).getType();
+	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getType();
 
 	
-	if (boolean)
+	if (paramFound)
 	{
 	switch (paramType)
 	{
@@ -449,6 +455,10 @@ void AVrayInterface::GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginTyp
 			fstringTemp = stringTemp.c_str();
 			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
 		}
+	}
+		break;
+	case EVrayPluginType::ECamera:
+	{
 	}
 		break;
 	case EVrayPluginType::EGeneric:
