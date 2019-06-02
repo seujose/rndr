@@ -378,6 +378,7 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	{
 		tempString = plugin.getType();
 		PluginType.Push(tempString.c_str());
+		
 		tempString = plugin.getName();
 		PluginName.Push(tempString.c_str());
 	}
