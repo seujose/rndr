@@ -6,7 +6,7 @@
 #include "vrayplugins.hpp"
 #include "VrayInterface.generated.h"
 
-UENUM(BlueprintType)		//"BlueprintType" is essential to include
+UENUM(BlueprintType)
 enum class EVrayPluginType : uint8
 {
 	ENode UMETA(DisplayName = "Node"),
@@ -16,48 +16,30 @@ enum class EVrayPluginType : uint8
 	ECamera UMETA(DisplayName = "Camera"),
 	EGeneric UMETA(DisplayName = "Generic")
 };
-
-
+//#hasdfaksdf
 UCLASS()
 class RNDR_API AVrayInterface : public AActor
 {
 	GENERATED_BODY()
-	
 public:	
-	// Sets default values for this actor's properties
 	AVrayInterface();
-
 	VRay::VRayRenderer renderer;
-
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene();
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void Render(int option);
-
 	UFUNCTION(BlueprintPure, Category = "vray")
-		TArray<FString> GetVrayNodeNames();
-
+		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType);
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue);
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
 			FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,
 			FString&ParameterValue);
-	
-	
-
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };

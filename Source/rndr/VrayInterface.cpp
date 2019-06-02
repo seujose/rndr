@@ -371,16 +371,16 @@ void AVrayInterface::Render(int option)
 	}
 }
 
-TArray<FString> AVrayInterface::GetVrayNodeNames()
+void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
 {
-	TArray<FString> out;
-	FString temp;
-	for (size_t i = 0; i < renderer.getPlugins<Node>().size(); i++)
+	string tempString;
+	for (const Plugin& plugin : renderer.getPlugins())
 	{
-		temp = renderer.getPlugins<Node>()[i].getName();
-		out.Push(temp);
+		tempString = plugin.getType();
+		PluginType.Push(tempString.c_str());
+		tempString = plugin.getName();
+		PluginName.Push(tempString.c_str());
 	}
-	return out;
 }
 
 void AVrayInterface::GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType)
