@@ -181,13 +181,15 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("param not found"));
+		UE_LOG(LogTemp, Warning, TEXT("%s not found"), *ParameterName);
 	}
 	 
 }
 
 void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
 { 
+	string tempString;
+	FString tempFString;
 	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
 	switch (PluginType)
@@ -222,7 +224,6 @@ void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<F
 	}
 
 	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getType();
-
 	
 	if (paramFound)
 	{
@@ -345,7 +346,9 @@ void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<F
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("param not found"));
+		tempString = plugin.getType();
+		tempString = tempString.c_str();
+		UE_LOG(LogTemp, Warning, TEXT("%s not found-type is %s"), *ParameterName, *tempFString);
 	}
 }
 
