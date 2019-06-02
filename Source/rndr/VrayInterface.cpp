@@ -1,3 +1,4 @@
+//#implementar seleção e movimentação
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
@@ -363,6 +364,10 @@ void AVrayInterface::Render(int option)
 	{
 		case 0:
 		{
+			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
+			gi.set_on(true);
+			gi.set_primary_engine(2);
+			gi.set_secondary_engine(3);
 			renderer.startSync();
 		}
 		break;
