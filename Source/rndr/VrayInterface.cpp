@@ -26,48 +26,68 @@ void AVrayInterface::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+//um getInfo para buscar infos apos a criacao dos plugins
+// #TODO  criar node, criar mesh com vertices etc
+//spawn ok, falta inserir na cena 
+
 /************************************************************************/
 /* forward declarations                                                 */
 /************************************************************************/
+
 /************************************************************************/
 /* implementations                                                      */
 /************************************************************************/
-void AVrayInterface::CreatePlugin(FString PluginName, EVrayPluginType PluginType)
+void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
 {
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
 	{
-		Node node = renderer.newPlugin<Node>(TCHAR_TO_UTF8(*PluginName));
+		Node node = renderer.newPlugin<Node>();
+		MtlSingleBRDF nodeMat = renderer.newPlugin<MtlSingleBRDF>();
+		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
+		nodeMat.set_brdf(nodeMatBrdf);
+		node.set_material(nodeMat);
+		string temp = node.getName();
+		PluginNameOut = temp.c_str();
 	}
 	break;
 	case EVrayPluginType::EMaterial:
 	{
-		MtlSingleBRDF mtlSingleBRDF = renderer.newPlugin<MtlSingleBRDF>(TCHAR_TO_UTF8(*PluginName));
+		MtlSingleBRDF mtlSingleBRDF = renderer.newPlugin<MtlSingleBRDF>();
+		string temp = mtlSingleBRDF.getName();
+		PluginNameOut = temp.c_str();
 	}
 		break;
 	case EVrayPluginType::EBRDF:
 	{
-		BRDFVRayMtl brdf  = renderer.newPlugin<BRDFVRayMtl>(TCHAR_TO_UTF8(*PluginName));
-	}
-		break;
-	case EVrayPluginType::ELight:
-	{
-		LightRectangle light  = renderer.newPlugin<LightRectangle>(TCHAR_TO_UTF8(*PluginName));
+		BRDFVRayMtl brdf = renderer.newPlugin<BRDFVRayMtl>();
+		string temp = brdf.getName();
+		PluginNameOut = temp.c_str();
 	}
 		break;
 	case EVrayPluginType::ECamera:
 	{
-		CameraPhysical camera = renderer.newPlugin<CameraPhysical>(TCHAR_TO_UTF8(*PluginName));
 	}
 		break;
+
+	case EVrayPluginType::ELightSphere:
+	{
+		LightSphere lightSphere = renderer.newPlugin<LightSphere>();
+		lightSphere.set_intensity(30.0);
+		lightSphere.set_radius(112.821);
+		string temp = lightSphere.getName();
+		PluginNameOut = temp.c_str();
+	}
 	case EVrayPluginType::EGeneric:
 		break;
 	default:
 		break;
 	}
-}
-bool AVrayInterface::DeletePlugin(FString PluginName)
+} 
+
+bool AVrayInterface::DeletePluginCpp(FString PluginName)
 {
 	Plugin plugin = renderer.getPlugin(TCHAR_TO_UTF8(*PluginName));
 	string tempString = plugin.getType();
@@ -106,8 +126,6 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
 		plugin = bRDFVRayMtl;
 	}
-		break;
-	case EVrayPluginType::ELight:
 		break;
 	case EVrayPluginType::ECamera:
 	{
@@ -235,8 +253,10 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	}
 	 
 }
-void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
+
+void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&DescriptionOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
 { 
+	vector<string>propertyNames;
 	string tempString;
 	FString tempFString;
 	floatArrayOut.Init(0.0, 4);
@@ -247,6 +267,7 @@ void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<F
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		plugin = node;
+	 
 	}
 		break;
 	case EVrayPluginType::EMaterial:
@@ -264,16 +285,39 @@ void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<F
 		plugin = bRDFVRayMtl;
 	}
 		break;
-	case EVrayPluginType::ELight:
+	case EVrayPluginType::ELightSphere:
+	{
+		LightSphere lightSphere = renderer.getPlugin<LightSphere>(TCHAR_TO_UTF8(*nameIn));
+		if (ParameterName.IsEmpty())
+		{
+			FString FStringTemp;
+			string stringTemp;
+			PluginMeta pluginMeta = renderer.getPluginMeta(lightSphere.getType());
+	 		propertyNames = pluginMeta.getPropertyNames();
+			for (size_t i = 0; i < propertyNames.size(); i++)
+			{
+				PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
+				FStringTemp = propertyNames[i].c_str();
+				propertyNamesOut.Push(FStringTemp);
+				stringTemp = lightSphere.getValueAsString(propertyNames[i]);
+				FStringTemp = stringTemp.c_str();
+				PropertyValuesOut.Push(FStringTemp);
+			}
+		}
+		plugin = lightSphere;
+	}
+	case EVrayPluginType::ELightRectangle:
+	{
+		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
+		plugin = lightRectangle;
+	}
 		break;
 	case EVrayPluginType::EGeneric:
 		break;
 	default:
 		break;
 	}
-
 	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getType();
-	
 	if (paramFound)
 	{
 	switch (paramType)
@@ -440,93 +484,93 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
-void AVrayInterface::GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType)
-{
-	string stringTemp;
-	FString fstringTemp;
-	vector<string>propertyNames;
-	Node node = renderer.getPlugins<Node>()[0];
-	Plugin plugin = renderer.getPlugin(node.get_material().getName());
-	MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(plugin);
-
-	switch (PluginType)
-	{
-	case EVrayPluginType::ENode:
-	{
-		PluginMeta pluginMeta = renderer.getPluginMeta(node.getType());
-		propertyNames = pluginMeta.getPropertyNames();
-		for (size_t i = 0; i < propertyNames.size(); i++)
-		{
-			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
-
-			fstringTemp = propertyNames[i].c_str();
-			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
-
-			stringTemp = node.getValue(propertyNames[i]).getStringType();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
-
-			stringTemp = propertyMeta.getUIGuides();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
-		}
-	}
-		break;
-	case EVrayPluginType::EMaterial:
-	{
-		PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.getType());
-		propertyNames = pluginMeta.getPropertyNames();
-		for (size_t i = 0; i < propertyNames.size(); i++)
-		{
-			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
-
-			fstringTemp = propertyNames[i].c_str();
-			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
-
-			stringTemp = mtlSingleBRDF.getValue(propertyNames[i]).getStringType();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
-
-			stringTemp = propertyMeta.getUIGuides();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
-		}
-	}
-		break;
-	case EVrayPluginType::EBRDF:
-	{
-		PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.get_brdf().getType());
-		propertyNames = pluginMeta.getPropertyNames();
-		for (size_t i = 0; i < propertyNames.size(); i++)
-		{
-			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
-
-			fstringTemp = propertyNames[i].c_str();
-			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
-
-			stringTemp = mtlSingleBRDF.get_brdf().getValue(propertyNames[i]).getStringType();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
-
-			stringTemp = propertyMeta.getUIGuides();
-			fstringTemp = stringTemp.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
-		}
-	}
-		break;
-	case EVrayPluginType::ECamera:
-	{
-	}
-		break;
-	case EVrayPluginType::EGeneric:
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GetPluginPropertyNamesValuesTypes generic switch"));
-	}
-		break;
-	default:
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GetPluginPropertyNamesValuesTypes default switch"));
-	}
-		break;
-	}
-}
+// void AVrayInterface::GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType)
+// {
+// 	string stringTemp;
+// 	FString fstringTemp;
+// 	vector<string>propertyNames;
+// 	Node node = renderer.getPlugins<Node>()[0];
+// 	Plugin plugin = renderer.getPlugin(node.get_material().getName());
+// 	MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(plugin);
+// 
+// 	switch (PluginType)
+// 	{
+// 	case EVrayPluginType::ENode:
+// 	{
+// 		PluginMeta pluginMeta = renderer.getPluginMeta(node.getType());
+// 		propertyNames = pluginMeta.getPropertyNames();
+// 		for (size_t i = 0; i < propertyNames.size(); i++)
+// 		{
+// 			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
+// 
+// 			fstringTemp = propertyNames[i].c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
+// 
+// 			stringTemp = node.getValue(propertyNames[i]).getStringType();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
+// 
+// 			stringTemp = propertyMeta.getUIGuides();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
+// 		}
+// 	}
+// 		break;
+// 	case EVrayPluginType::EMaterial:
+// 	{
+// 		PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.getType());
+// 		propertyNames = pluginMeta.getPropertyNames();
+// 		for (size_t i = 0; i < propertyNames.size(); i++)
+// 		{
+// 			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
+// 
+// 			fstringTemp = propertyNames[i].c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
+// 
+// 			stringTemp = mtlSingleBRDF.getValue(propertyNames[i]).getStringType();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
+// 
+// 			stringTemp = propertyMeta.getUIGuides();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
+// 		}
+// 	}
+// 		break;
+// 	case EVrayPluginType::EBRDF:
+// 	{
+// 		PluginMeta pluginMeta = renderer.getPluginMeta(mtlSingleBRDF.get_brdf().getType());
+// 		propertyNames = pluginMeta.getPropertyNames();
+// 		for (size_t i = 0; i < propertyNames.size(); i++)
+// 		{
+// 			PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
+// 
+// 			fstringTemp = propertyNames[i].c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("name (%s)"), *fstringTemp);
+// 
+// 			stringTemp = mtlSingleBRDF.get_brdf().getValue(propertyNames[i]).getStringType();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("type (%s)"), *fstringTemp);
+// 
+// 			stringTemp = propertyMeta.getUIGuides();
+// 			fstringTemp = stringTemp.c_str();
+// 			UE_LOG(LogTemp, Warning, TEXT("UI (%s)"), *fstringTemp);
+// 		}
+// 	}
+// 		break;
+// 	case EVrayPluginType::ECamera:
+// 	{
+// 	}
+// 		break;
+// 	case EVrayPluginType::EGeneric:
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("GetPluginPropertyNamesValuesTypes generic switch"));
+// 	}
+// 		break;
+// 	default:
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("GetPluginPropertyNamesValuesTypes default switch"));
+// 	}
+// 		break;
+// 	}
+// }

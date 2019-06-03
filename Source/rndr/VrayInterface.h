@@ -13,7 +13,8 @@ enum class EVrayPluginType : uint8
 	ENode UMETA(DisplayName = "Node"),
 	EMaterial UMETA(DisplayName = "Material"),
 	EBRDF UMETA(DisplayName = "BRDF"),
-	ELight UMETA(DisplayName = "Light"), 
+	ELightRectangle UMETA(DisplayName = "LightRectangle"),
+	ELightSphere UMETA(DisplayName = "LightSphere"),
 	ECamera UMETA(DisplayName = "Camera"),
 	EGeneric UMETA(DisplayName = "Generic")
 };
@@ -28,19 +29,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene();
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		bool DeletePlugin(FString PluginName);
+		bool DeletePluginCpp(FString PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void CreatePlugin(FString PluginName, EVrayPluginType PluginType);
+		void CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void Render(int option);
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
-	UFUNCTION(BlueprintCallable, Category = "vray")
-		void GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType);
+	//UFUNCTION(BlueprintCallable, Category = "vray")
+		//void GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
+		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&DescriptionOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
 			FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,
 			FString&ParameterValue);
 protected:
