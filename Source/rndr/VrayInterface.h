@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CoreMinimal.h"
 #include "RndrNode.h"
 #include "GameFramework/Actor.h"
@@ -16,7 +17,7 @@ enum class EVrayPluginType : uint8
 	ECamera UMETA(DisplayName = "Camera"),
 	EGeneric UMETA(DisplayName = "Generic")
 };
-//#hasdfaksdf
+
 UCLASS()
 class RNDR_API AVrayInterface : public AActor
 {
@@ -26,6 +27,10 @@ public:
 	VRay::VRayRenderer renderer;
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene();
+	UFUNCTION(BlueprintCallable, Category = "vray")
+		bool DeletePlugin(FString PluginName);
+	UFUNCTION(BlueprintCallable, Category = "vray")
+		void CreatePlugin(FString PluginName, EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void Render(int option);
 	UFUNCTION(BlueprintPure, Category = "vray")

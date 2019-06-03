@@ -1,4 +1,3 @@
-//#implementar seleção e movimentação
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
@@ -9,16 +8,19 @@
 using namespace VRay;
 using namespace VRay::Plugins;
 using namespace std;
+
 VRay::VRayInit init(true);
 
 AVrayInterface::AVrayInterface()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
+
 void AVrayInterface::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
 void AVrayInterface::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -27,10 +29,57 @@ void AVrayInterface::Tick(float DeltaTime)
 /************************************************************************/
 /* forward declarations                                                 */
 /************************************************************************/
-
 /************************************************************************/
 /* implementations                                                      */
 /************************************************************************/
+void AVrayInterface::CreatePlugin(FString PluginName, EVrayPluginType PluginType)
+{
+	switch (PluginType)
+	{
+	case EVrayPluginType::ENode:
+	{
+		Node node = renderer.newPlugin<Node>(TCHAR_TO_UTF8(*PluginName));
+	}
+	break;
+	case EVrayPluginType::EMaterial:
+	{
+		MtlSingleBRDF mtlSingleBRDF = renderer.newPlugin<MtlSingleBRDF>(TCHAR_TO_UTF8(*PluginName));
+	}
+		break;
+	case EVrayPluginType::EBRDF:
+	{
+		BRDFVRayMtl brdf  = renderer.newPlugin<BRDFVRayMtl>(TCHAR_TO_UTF8(*PluginName));
+	}
+		break;
+	case EVrayPluginType::ELight:
+	{
+		LightRectangle light  = renderer.newPlugin<LightRectangle>(TCHAR_TO_UTF8(*PluginName));
+	}
+		break;
+	case EVrayPluginType::ECamera:
+	{
+		CameraPhysical camera = renderer.newPlugin<CameraPhysical>(TCHAR_TO_UTF8(*PluginName));
+	}
+		break;
+	case EVrayPluginType::EGeneric:
+		break;
+	default:
+		break;
+	}
+}
+bool AVrayInterface::DeletePlugin(FString PluginName)
+{
+	Plugin plugin = renderer.getPlugin(TCHAR_TO_UTF8(*PluginName));
+	string tempString = plugin.getType();
+	if (tempString.compare("Node")==0)
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName));
+		renderer.deletePlugin(node);
+		return true;
+	}
+	return false;
+}
+
 void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue)
 {
 	ParamSetSuccessfully = false;
@@ -186,7 +235,6 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	}
 	 
 }
-
 void AVrayInterface::GetVrayPluginParameter(EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
 { 
 	string tempString;
