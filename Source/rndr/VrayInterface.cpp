@@ -1,3 +1,8 @@
+//bake para poder mostrar pra chaos 
+// commitar mudancas (posicao...)
+//get info esta somente para light?
+// #TODO  criar node, criar mesh com vertices etc
+
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
@@ -14,6 +19,7 @@ VRay::VRayInit init(true);
 AVrayInterface::AVrayInterface()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
 }
 
 void AVrayInterface::BeginPlay()
@@ -27,15 +33,11 @@ void AVrayInterface::Tick(float DeltaTime)
 
 }
 
-//um getInfo para buscar infos apos a criacao dos plugins
-// #TODO  criar node, criar mesh com vertices etc
-//spawn ok, falta inserir na cena 
-
 /************************************************************************/
 /* forward declarations                                                 */
 /************************************************************************/
 
-/************************************************************************/
+/**************************************\\**********************************/
 /* implementations                                                      */
 /************************************************************************/
 void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
@@ -90,18 +92,16 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 bool AVrayInterface::DeletePluginCpp(FString PluginName)
 {
 	Plugin plugin = renderer.getPlugin(TCHAR_TO_UTF8(*PluginName));
-	string tempString = plugin.getType();
-	if (tempString.compare("Node")==0)
+	if (renderer.deletePlugin(plugin))
 	{
-		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName));
-		renderer.deletePlugin(node);
 		return true;
 	}
 	return false;
 }
 
-void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, bool&boolean, FString ParameterName, FString ParameterValue)
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, FString ParameterValue)
 {
+	bool valueFound;
 	ParamSetSuccessfully = false;
 	Plugin plugin;
 	switch (PluginType)
@@ -139,10 +139,10 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 	}
 
-	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), boolean).getType();
+	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), valueFound).getType();
 
 
-	if (boolean)
+	if (valueFound)
 	{
 		switch (paramType)
 		{
@@ -183,6 +183,14 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 			break;
 		case VRay::TYPE_TRANSFORM:
 		{
+			VRay::Transform t=plugin.getTransform("transform");
+			t.offset.x = transformIn[3].X;
+			t.offset.y = transformIn[3].Y;
+			t.offset.z = transformIn[3].Z;
+			if (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), t))
+			{
+				ParamSetSuccessfully = true;
+			}
 		}
 		break;
 		case VRay::TYPE_STRING:
@@ -267,7 +275,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		plugin = node;
-	 
 	}
 		break;
 	case EVrayPluginType::EMaterial:
@@ -456,10 +463,21 @@ void AVrayInterface::Render(int option)
 	{
 		case 0:
 		{
+			VRayRenderer::VFB& vfb = renderer.vfb;
+			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
+			vfb.setPositionAndSize(-800, 500, 800, 600);         // Position in screen-space and size in pixels
+			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
+			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
+			size_t numBytes = 0;
+			VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
+			vfb.setState(stateBuffer, numBytes);
+
 			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
 			gi.set_on(true);
 			gi.set_primary_engine(2);
 			gi.set_secondary_engine(3);
+			
+			renderer.setKeepInteractiveRunning(true);
 			renderer.startSync();
 		}
 		break;
