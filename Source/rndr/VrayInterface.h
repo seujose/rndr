@@ -7,6 +7,8 @@
 #include "vrayplugins.hpp"
 #include "VrayInterface.generated.h"
 
+ 
+
 UENUM(BlueprintType)
 enum class EVrayPluginType : uint8
 {
@@ -39,9 +41,9 @@ public:
 	//UFUNCTION(BlueprintCallable, Category = "vray")
 		//void GetPluginPropertyNamesValuesTypes(EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, FString ParameterValue);
+		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&DescriptionOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
+		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
 			FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,
 			FString&ParameterValue);
 protected:
