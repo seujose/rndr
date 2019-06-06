@@ -105,6 +105,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	bool valueFound;
 	ParamSetSuccessfully = false;
 	Plugin plugin;
+
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
@@ -120,6 +121,12 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		plugin = mtlSingleBRDF;
 	}
 		break;
+	case EVrayPluginType::ELightSphere:
+	{
+		LightSphere lightSphere = renderer.getPlugin<LightSphere>(TCHAR_TO_UTF8(*nameIn));
+		plugin = lightSphere;
+	}
+	break;
 	case EVrayPluginType::EBRDF:
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
@@ -142,14 +149,13 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 
 	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), valueFound).getType();
 
-
 	if (valueFound)
 	{
 		switch (paramType)
 		{
 		case VRay::TYPE_INT:
 		{
-			intIn = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getInt();
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), intIn));
 		}
 		break;
 		case VRay::TYPE_FLOAT:
@@ -165,19 +171,21 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 			break;
 		case VRay::TYPE_COLOR:
 		{
-			Color color = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getColor();
-			colorIn.R = color.r;
-			colorIn.G = color.g;
-			colorIn.B = color.b;
+			Color color; 
+			color.r = colorIn.R;
+			color.g = colorIn.R;
+			color.b = colorIn.G;
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), color));
 		}
 		break;
 		case VRay::TYPE_ACOLOR:
 		{
-			AColor acolor = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getAColor();
-			colorIn.R = acolor.color.r;
-			colorIn.G = acolor.color.g;
-			colorIn.B = acolor.color.b;
-			colorIn.A = acolor.alpha;
+			AColor aColor;
+			aColor.color.r = colorIn.R;
+			aColor.color.g = colorIn.R;
+			aColor.color.b = colorIn.G;
+			aColor.alpha = 1.0;
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
 		}
 		break;
 		case VRay::TYPE_MATRIX:
@@ -256,11 +264,11 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 			break;
 		}
 	}
+
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s not found"), *ParameterName);
 	}
-	 
 }
 
 void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
@@ -476,7 +484,7 @@ void AVrayInterface::Render(int option)
 			
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(-800, 500, 800, 600);         // Position in screen-space and size in pixels
+			vfb.setPositionAndSize(22, 1437, 800, 600);         // Position in screen-space and size in pixels
 			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
 			size_t numBytes = 0;
