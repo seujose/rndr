@@ -271,6 +271,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	FString tempFString;
 	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
+	//renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
@@ -297,6 +298,22 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	case EVrayPluginType::ELightSphere:
 	{
 		LightSphere lightSphere = renderer.getPlugin<LightSphere>(TCHAR_TO_UTF8(*nameIn));
+		if (ParameterName.IsEmpty())
+		{
+			FString FStringTemp;
+			string stringTemp;
+			PluginMeta pluginMeta = renderer.getPluginMeta(lightSphere.getType());
+			propertyNames = pluginMeta.getPropertyNames();
+			for (size_t i = 0; i < propertyNames.size(); i++)
+			{
+				PropertyMeta propertyMeta = pluginMeta.getPropertyMeta(propertyNames[i]);
+				FStringTemp = propertyNames[i].c_str();
+				propertyNamesOut.Push(FStringTemp);
+				stringTemp = lightSphere.getValueAsString(propertyNames[i]);
+				FStringTemp = stringTemp.c_str();
+				PropertyValuesOut.Push(FStringTemp);
+			}
+		}
 		plugin = lightSphere;
 	}
 	break;
@@ -445,7 +462,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		}
 	}
 }
-
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
 {
 	string tempString;
