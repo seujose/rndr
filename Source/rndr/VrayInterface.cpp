@@ -433,6 +433,9 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 	else
 	{
+		propertyNamesOut.Empty();
+		PropertyValuesOut.Empty();
+		ParamTypeOut.Empty();
 		PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
 		propertyNames = pluginMeta.getPropertyNames();
 		for (size_t i = 0; i < propertyNames.size(); i++)
