@@ -316,6 +316,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		}
 		plugin = lightSphere;
 	}
+	break;
 	case EVrayPluginType::ELightRectangle:
 	{
 		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
