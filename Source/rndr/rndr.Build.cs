@@ -11,8 +11,8 @@ public class rndr : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
-        PublicIncludePaths.AddRange(new string[] {   "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });
-        PublicAdditionalLibraries.AddRange(new string[] {  "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\lib\\VRaySDKLibrary.lib" });
+        PublicIncludePaths.AddRange(new string[] { "C:\\rndr\\Source\\assimp", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });
+        PublicAdditionalLibraries.AddRange(new string[] { "C:\\rndr\\Binaries\\Win64\\assimp-vc140-mt.lib", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\lib\\VRaySDKLibrary.lib" });
 
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

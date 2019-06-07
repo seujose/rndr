@@ -29,7 +29,7 @@ public:
 	AVrayInterface();
 	VRay::VRayRenderer renderer;
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void LoadScene();
+		void LoadScene(FString path);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		bool DeletePluginCpp(FString PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")

@@ -470,9 +470,10 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
-void AVrayInterface::LoadScene()
+void AVrayInterface::LoadScene(FString path)
 {
-	renderer.load("C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
+	// "C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
+	renderer.load(TCHAR_TO_UTF8(*path));
 }
 
 void AVrayInterface::Render(int option)
@@ -484,7 +485,7 @@ void AVrayInterface::Render(int option)
 			
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(22, 1437, 800, 600);         // Position in screen-space and size in pixels
+			vfb.setPositionAndSize(0, 1300, 800, 600);         // Position in screen-space and size in pixels
 			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
 			size_t numBytes = 0;
