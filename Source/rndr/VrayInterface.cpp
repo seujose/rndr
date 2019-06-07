@@ -37,10 +37,76 @@ void AVrayInterface::Tick(float DeltaTime)
 /************************************************************************/
 /* forward declarations                                                 */
 /************************************************************************/
-
 /**************************************\\**********************************/
 /* implementations                                                      */
 /************************************************************************/
+
+VRay::Plugins::GeomStaticMesh AVrayInterface::CreateVrayStaticMesh()
+{
+	// Create a new static geometry
+	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
+	// Assign a cube geometry
+	Vector vertices[] = {
+		Vector(-26.7598, -30.5826, 0.0),
+		Vector(26.7598, -30.5826, 0.0),
+		Vector(-26.7598, 30.5826, 0.0),
+		Vector(26.7598, 30.5826, 0.0),
+		Vector(-26.7598, -30.5826, 125.389),
+		Vector(26.7598, -30.5826, 125.389),
+		Vector(-26.7598, 30.5826, 125.389),
+		Vector(26.7598, 30.5826, 125.389)
+	};
+	mesh.set_vertices(VectorList(vertices, vertices + 8));
+	int faces[] = {
+		0, 2, 3,
+		3, 1, 0,
+		4, 5, 7,
+		7, 6, 4,
+		0, 1, 5,
+		5, 4, 0,
+		1, 3, 7,
+		7, 5, 1,
+		3, 2, 6,
+		6, 7, 3,
+		2, 0, 4,
+		4, 6, 2
+	};
+	mesh.set_faces(IntList(faces, faces + 36));
+	Vector normals[] = {
+		Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0),
+		Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0),
+		Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0),
+		Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0),
+		Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0),
+		Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0),
+		Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0),
+		Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0),
+		Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0),
+		Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0),
+		Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0),
+		Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0)
+	};
+	mesh.set_normals(VectorList(normals, normals + 36));
+	int faceNormals[] = {
+		0, 1, 2,
+		3, 4, 5,
+		6, 7, 8,
+		9, 10, 11,
+		12, 13, 14,
+		15, 16, 17,
+		18, 19, 20,
+		21, 22, 23,
+		24, 25, 26,
+		27, 28, 29,
+		30, 31, 32,
+		33, 34, 35
+	};
+	mesh.set_faceNormals(IntList(faceNormals, faceNormals + 36));
+	return mesh;
+}
+
+
+
 void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
 {
 	switch (PluginType)
@@ -52,6 +118,10 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
 		nodeMat.set_brdf(nodeMatBrdf);
 		node.set_material(nodeMat);
+		node.set_geometry(CreateVrayStaticMesh());
+		node.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
+			Vector(0.0, 1.0, 0.0),
+			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 0)));
 		string temp = node.getName();
 		PluginNameOut = temp.c_str();
 	}
@@ -72,18 +142,33 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		break;
 	case EVrayPluginType::ECamera:
 	{
+		/*
+		CameraPhysical cameraPhysical = renderer.newPlugin<CameraPhysical>();
+		string temp = cameraPhysical.getName();
+		PluginNameOut = temp.c_str();
+		*/
+
+		RenderView renderView = renderer.newPlugin<RenderView>();
+		renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0),
+			Vector(0.12, -0.3, 0.94),
+			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
+		renderView.set_fov(1.65806);
 	}
 		break;
 
 	case EVrayPluginType::ELightSphere:
 	{
 		LightSphere lightSphere = renderer.newPlugin<LightSphere>();
-		lightSphere.set_intensity(30.0);
-		lightSphere.set_radius(112.821);
+		lightSphere.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
+			Vector(0.0, 1.0, 0.0),
+			Vector(0.0, 0.0, 1.0)), Vector(-20.6777, 131.6402, 150)));
+		lightSphere.set_color(Color(1.0, 1.0, 1.0));
+		lightSphere.set_intensity(30);
+		lightSphere.set_radius(50);
 		string temp = lightSphere.getName();
 		PluginNameOut = temp.c_str();
 	}
-	case EVrayPluginType::EGeneric:
+	case EVrayPluginType::EAll:
 		break;
 	default:
 		break;
@@ -141,7 +226,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		plugin = renderView;
 	}
 		break;
-	case EVrayPluginType::EGeneric:
+	case EVrayPluginType::EAll:
 		break;
 	default:
 		break;
@@ -314,145 +399,155 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		plugin = lightRectangle;
 	}
 	break;
-	case EVrayPluginType::EGeneric:
-		break;
-	default:
-		break;
-	}
-	Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getType();
-	if (paramFound)
+	case EVrayPluginType::EAll:
 	{
-		switch (paramType)
+		UE_LOG(LogTemp, Warning, TEXT("listing all plugins: "));
+		for (const Plugin&plugin : renderer.getPlugins())
 		{
-		case VRay::TYPE_INT:
-		{
-			intOut = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getInt();
+			tempString = plugin.getName();
+			tempFString = tempString.c_str();
+			UE_LOG(LogTemp, Warning, TEXT("(%s)"),*tempFString);
 		}
-		break;
-		case VRay::TYPE_FLOAT:
+	}
+	break;
+	}
+	if (plugin.isNotEmpty())
+	{
+		Type paramType = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getType();
+		if (paramFound)
 		{
-			floatArrayOut[0] = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getFloat();
-		}
-		break;
-		case VRay::TYPE_DOUBLE:
-			break;
-		case VRay::TYPE_BOOL:
-			break;
-		case VRay::TYPE_VECTOR:
-			break;
-		case VRay::TYPE_COLOR:
-		{
-			Color color = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getColor();
-			colorOut.R = color.r;
-			colorOut.G = color.g;
-			colorOut.B = color.b;
-		}
-		break;
-		case VRay::TYPE_ACOLOR:
-		{
-			AColor acolor = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getAColor();
-			colorOut.R = acolor.color.r;
-			colorOut.G = acolor.color.g;
-			colorOut.B = acolor.color.b;
-			colorOut.A = acolor.alpha;
-		}
-		break;
-		case VRay::TYPE_MATRIX:
-			break;
-		case VRay::TYPE_TRANSFORM:
-		{
-			VRay::Transform transform = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
-			FVector temp;
-			transformOut.Init(temp, 4);
-
-			for (size_t i = 0; i < 2; i++)
+			switch (paramType)
 			{
-				transformOut[i].X = transform.matrix[i].x;
-				transformOut[i].Y = transform.matrix[i].y;
-				transformOut[i].Z = transform.matrix[i].z;
+			case VRay::TYPE_INT:
+			{
+				intOut = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getInt();
 			}
+			break;
+			case VRay::TYPE_FLOAT:
+			{
+				floatArrayOut[0] = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getFloat();
+			}
+			break;
+			case VRay::TYPE_DOUBLE:
+				break;
+			case VRay::TYPE_BOOL:
+				break;
+			case VRay::TYPE_VECTOR:
+				break;
+			case VRay::TYPE_COLOR:
+			{
+				Color color = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getColor();
+				colorOut.R = color.r;
+				colorOut.G = color.g;
+				colorOut.B = color.b;
+			}
+			break;
+			case VRay::TYPE_ACOLOR:
+			{
+				AColor acolor = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getAColor();
+				colorOut.R = acolor.color.r;
+				colorOut.G = acolor.color.g;
+				colorOut.B = acolor.color.b;
+				colorOut.A = acolor.alpha;
+			}
+			break;
+			case VRay::TYPE_MATRIX:
+				break;
+			case VRay::TYPE_TRANSFORM:
+			{
+				VRay::Transform transform = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
+				FVector temp;
+				transformOut.Init(temp, 4);
 
-			transformOut[3].X = transform.offset.x;
-			transformOut[3].Y = transform.offset.y;
-			transformOut[3].Z = transform.offset.z;
+				for (size_t i = 0; i < 2; i++)
+				{
+					transformOut[i].X = transform.matrix[i].x;
+					transformOut[i].Y = transform.matrix[i].y;
+					transformOut[i].Z = transform.matrix[i].z;
+				}
+
+				transformOut[3].X = transform.offset.x;
+				transformOut[3].Y = transform.offset.y;
+				transformOut[3].Z = transform.offset.z;
+			}
+			break;
+			case VRay::TYPE_STRING:
+				break;
+			case VRay::TYPE_PLUGIN:
+				break;
+			case VRay::TYPE_TEXTURE:
+				break;
+			case VRay::TYPE_LIST:
+				break;
+			case VRay::TYPE_TEXTUREFLOAT:
+				break;
+			case VRay::TYPE_TEXTUREINT:
+				break;
+			case VRay::TYPE_TEXTUREVECTOR:
+				break;
+			case VRay::TYPE_TEXTUREMATRIX:
+				break;
+			case VRay::TYPE_TEXTURETRANSFORM:
+				break;
+				//case VRay::TYPE_GENERAL_LIST:
+					//break;
+			case VRay::TYPE_INT_LIST:
+				break;
+			case VRay::TYPE_FLOAT_LIST:
+				break;
+			case VRay::TYPE_BOOL_LIST:
+				break;
+			case VRay::TYPE_VECTOR_LIST:
+				break;
+			case VRay::TYPE_COLOR_LIST:
+				break;
+			case VRay::TYPE_STRING_LIST:
+				break;
+			case VRay::TYPE_PLUGIN_LIST:
+				break;
+			case VRay::TYPE_TEXTURE_LIST:
+				break;
+			case VRay::TYPE_TEXTUREFLOAT_LIST:
+				break;
+			case VRay::TYPE_TEXTUREMATRIX_LIST:
+				break;
+			case VRay::TYPE_TEXTURETRANSFORM_LIST:
+				break;
+			case VRay::TYPE_OUTPUTTEXTURE:
+				break;
+			case VRay::TYPE_OUTPUTTEXTUREFLOAT:
+				break;
+			case VRay::TYPE_OUTPUTTEXTUREINT:
+				break;
+			case VRay::TYPE_OUTPUTTEXTUREVECTOR:
+				break;
+			case VRay::TYPE_OUTPUTTEXTUREMATRIX:
+				break;
+			case VRay::TYPE_OUTPUTTEXTURETRANSFORM:
+				break;
+			case VRay::TYPE_UNSPECIFIED:
+				break;
+			case VRay::TYPE_ERROR:
+				break;
+			default:
+				break;
+			}
 		}
-		break;
-		case VRay::TYPE_STRING:
-			break;
-		case VRay::TYPE_PLUGIN:
-			break;
-		case VRay::TYPE_TEXTURE:
-			break;
-		case VRay::TYPE_LIST:
-			break;
-		case VRay::TYPE_TEXTUREFLOAT:
-			break;
-		case VRay::TYPE_TEXTUREINT:
-			break;
-		case VRay::TYPE_TEXTUREVECTOR:
-			break;
-		case VRay::TYPE_TEXTUREMATRIX:
-			break;
-		case VRay::TYPE_TEXTURETRANSFORM:
-			break;
-			//case VRay::TYPE_GENERAL_LIST:
-				//break;
-		case VRay::TYPE_INT_LIST:
-			break;
-		case VRay::TYPE_FLOAT_LIST:
-			break;
-		case VRay::TYPE_BOOL_LIST:
-			break;
-		case VRay::TYPE_VECTOR_LIST:
-			break;
-		case VRay::TYPE_COLOR_LIST:
-			break;
-		case VRay::TYPE_STRING_LIST:
-			break;
-		case VRay::TYPE_PLUGIN_LIST:
-			break;
-		case VRay::TYPE_TEXTURE_LIST:
-			break;
-		case VRay::TYPE_TEXTUREFLOAT_LIST:
-			break;
-		case VRay::TYPE_TEXTUREMATRIX_LIST:
-			break;
-		case VRay::TYPE_TEXTURETRANSFORM_LIST:
-			break;
-		case VRay::TYPE_OUTPUTTEXTURE:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREFLOAT:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREINT:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREVECTOR:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREMATRIX:
-			break;
-		case VRay::TYPE_OUTPUTTEXTURETRANSFORM:
-			break;
-		case VRay::TYPE_UNSPECIFIED:
-			break;
-		case VRay::TYPE_ERROR:
-			break;
-		default:
-			break;
-		}
-	}
-	else
-	{
-		propertyNamesOut.Empty();
-		PropertyValuesOut.Empty();
-		ParamTypeOut.Empty();
-		PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
-		propertyNames = pluginMeta.getPropertyNames();
-		for (size_t i = 0; i < propertyNames.size(); i++)
+		else
 		{
-			propertyNamesOut.Push(propertyNames[i].c_str());
-			tempString = plugin.getValueAsString(propertyNames[i]);
-			PropertyValuesOut.Push(tempString.c_str());
-			tempString = plugin.getValue(propertyNames[i]).getStringType();
-			ParamTypeOut.Push(tempString.c_str());
+			propertyNamesOut.Empty();
+			PropertyValuesOut.Empty();
+			ParamTypeOut.Empty();
+			PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
+			propertyNames = pluginMeta.getPropertyNames();
+			for (size_t i = 0; i < propertyNames.size(); i++)
+			{
+				propertyNamesOut.Push(propertyNames[i].c_str());
+				tempString = plugin.getValueAsString(propertyNames[i]);
+				PropertyValuesOut.Push(tempString.c_str());
+				tempString = plugin.getValue(propertyNames[i]).getStringType();
+				ParamTypeOut.Push(tempString.c_str());
+			}
 		}
 	}
 }

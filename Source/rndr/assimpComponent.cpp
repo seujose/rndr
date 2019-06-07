@@ -11,7 +11,7 @@ bool UassimpComponent::openMesh(FString path, int32& SectionCount, FString& Erro
 {
 	Assimp::Importer importer;
 	std::string filename(TCHAR_TO_UTF8(*path));
-	const aiScene* scene = importer.ReadFile(filename,aiProcessPreset_TargetRealtime_Quality| aiProcess_ConvertToLeftHanded);
+	const aiScene* scene = importer.ReadFile(filename,aiProcess_Triangulate);
 	if (!scene)
 	{
 		ErrorCode = importer.GetErrorString();

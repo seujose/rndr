@@ -18,7 +18,7 @@ enum class EVrayPluginType : uint8
 	ELightRectangle UMETA(DisplayName = "LightRectangle"),
 	ELightSphere UMETA(DisplayName = "LightSphere"),
 	ECamera UMETA(DisplayName = "Camera"),
-	EGeneric UMETA(DisplayName = "Generic")
+	EAll UMETA(DisplayName = "All")
 };
 
 UCLASS()
@@ -46,6 +46,8 @@ public:
 		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,
 			FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,
 			FString&ParameterValue);
+
+	VRay::Plugins::GeomStaticMesh CreateVrayStaticMesh();
 protected:
 	virtual void BeginPlay() override;
 public:	
