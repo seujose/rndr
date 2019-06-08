@@ -1,9 +1,6 @@
-
-
-
 //#bakParaChaos mostrar pra chaos 
-// #criarNode, verificar proporção do mesh
-
+//#criarNode, verificar proporção do mesh
+//#sincronizar selecao do menu com viewport
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
@@ -53,9 +50,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
 		nodeMat.set_brdf(nodeMatBrdf);
 		node.set_material(nodeMat);
-		node.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
-			Vector(0.0, 1.0, 0.0),
-			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 0)));
+		node.set_transform(Transform(Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)), Vector(0, 0, 0)));
 		string temp = node.getName();
 		PluginNameOut = temp.c_str();
 	}
@@ -494,7 +489,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-void AVrayInterface::CreateGeomStaticMesh(TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+void AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -502,35 +497,35 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector>UnrealVertices, TArray<
 	vector<Vector>normals;
 	vector<int>faceNormals;
 	Vector tempVector;
-
-	for (size_t i = 0; i < UnrealVertices.Num(); i++)
+	if (box)
 	{
-		tempVector.set(UnrealVertices[i].Z, UnrealVertices[i].Y, UnrealVertices[i].Z);
-		vertices.push_back(tempVector);
 	}
-	mesh.set_vertices(vertices);
-
-	for (size_t i = 0; i < UnrealFaces.Num(); i++)
+	else
+	{
+		for (size_t i = 0; i < UnrealVertices.Num(); i++)
+		{
+			tempVector.set(UnrealVertices[i].Z, UnrealVertices[i].Y, UnrealVertices[i].Z);
+			vertices.push_back(tempVector);
+		}
+		for (size_t i = 0; i < UnrealFaces.Num(); i++)
 	{
 		facess.push_back(UnrealFaces[i]);
 	}
-	mesh.set_faces(facess);
-
-	for (size_t i = 0; i < UnrealNormals.Num(); i++)
+		for (size_t i = 0; i < UnrealNormals.Num(); i++)
 	{
 		tempVector.set(UnrealNormals[i].X, UnrealNormals[i].Y, UnrealNormals[i].Z);
 		normals.push_back(tempVector);
 	}
-	mesh.set_normals(normals);
-
-	for (size_t i = 0; i < UnrealFaceNormals.Num(); i++)
+		for (size_t i = 0; i < UnrealFaceNormals.Num(); i++)
 	{
 		faceNormals.push_back(UnrealFaceNormals[i]);
 	}
+	}
+	mesh.set_vertices(vertices);
+	mesh.set_faces(facess);
+	mesh.set_normals(normals);
 	mesh.set_faceNormals(faceNormals);
-
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
-
 	node.set_geometry(mesh);
 }
 
@@ -562,7 +557,7 @@ void AVrayInterface::Render(int option)
 			
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(0, 1300, 800, 600);         // Position in screen-space and size in pixels
+			vfb.setPositionAndSize(-800, 450, 800, 600);         // Position in screen-space and size in pixels
 			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
 			size_t numBytes = 0;
