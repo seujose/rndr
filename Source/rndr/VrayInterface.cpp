@@ -1,7 +1,8 @@
 
+
+
 //#bakParaChaos mostrar pra chaos 
-// #criarNode, criar mesh com vertices etc
-//#getinfo retorna arrays com tamanhos diferentes para nome do parametro e valor
+// #criarNode, verificar proporção do mesh
 
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
@@ -41,72 +42,6 @@ void AVrayInterface::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-VRay::Plugins::GeomStaticMesh AVrayInterface::CreateVrayStaticMesh()
-{
-	// Create a new static geometry
-	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
-	// Assign a cube geometry
-	Vector vertices[] = {
-		Vector(-26.7598, -30.5826, 0.0),
-		Vector(26.7598, -30.5826, 0.0),
-		Vector(-26.7598, 30.5826, 0.0),
-		Vector(26.7598, 30.5826, 0.0),
-		Vector(-26.7598, -30.5826, 125.389),
-		Vector(26.7598, -30.5826, 125.389),
-		Vector(-26.7598, 30.5826, 125.389),
-		Vector(26.7598, 30.5826, 125.389)
-	};
-	mesh.set_vertices(VectorList(vertices, vertices + 8));
-	int faces[] = {
-		0, 2, 3,
-		3, 1, 0,
-		4, 5, 7,
-		7, 6, 4,
-		0, 1, 5,
-		5, 4, 0,
-		1, 3, 7,
-		7, 5, 1,
-		3, 2, 6,
-		6, 7, 3,
-		2, 0, 4,
-		4, 6, 2
-	};
-	mesh.set_faces(IntList(faces, faces + 36));
-	Vector normals[] = {
-		Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0),
-		Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0), Vector(0.0, 0.0, -1.0),
-		Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0),
-		Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 1.0),
-		Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0),
-		Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0), Vector(0.0, -1.0, 0.0),
-		Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0),
-		Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0),
-		Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0),
-		Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 1.0, 0.0),
-		Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0),
-		Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0)
-	};
-	mesh.set_normals(VectorList(normals, normals + 36));
-	int faceNormals[] = {
-		0, 1, 2,
-		3, 4, 5,
-		6, 7, 8,
-		9, 10, 11,
-		12, 13, 14,
-		15, 16, 17,
-		18, 19, 20,
-		21, 22, 23,
-		24, 25, 26,
-		27, 28, 29,
-		30, 31, 32,
-		33, 34, 35
-	};
-	mesh.set_faceNormals(IntList(faceNormals, faceNormals + 36));
-	return mesh;
-}
-
-
-
 void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
 {
 	switch (PluginType)
@@ -118,7 +53,6 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
 		nodeMat.set_brdf(nodeMatBrdf);
 		node.set_material(nodeMat);
-		node.set_geometry(CreateVrayStaticMesh());
 		node.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
 			Vector(0.0, 1.0, 0.0),
 			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 0)));
@@ -153,6 +87,8 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 			Vector(0.12, -0.3, 0.94),
 			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
 		renderView.set_fov(1.65806);
+		string temp = renderView.getName();
+		PluginNameOut = temp.c_str();
 	}
 		break;
 
@@ -393,6 +329,12 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		plugin = lightSphere;
 	}
 	break;
+	case  EVrayPluginType::ECamera:
+	{
+		RenderView renderView = renderer.getPlugin<RenderView>(TCHAR_TO_UTF8(*nameIn));
+		plugin = renderView;
+	}
+	break;
 	case EVrayPluginType::ELightRectangle:
 	{
 		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
@@ -550,6 +492,46 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 			}
 		}
 	}
+}
+
+void AVrayInterface::CreateGeomStaticMesh(TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+{
+	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
+	vector<Vector>vertices;
+	vector<int>facess;
+	vector<Vector>normals;
+	vector<int>faceNormals;
+	Vector tempVector;
+
+	for (size_t i = 0; i < UnrealVertices.Num(); i++)
+	{
+		tempVector.set(UnrealVertices[i].Z, UnrealVertices[i].Y, UnrealVertices[i].Z);
+		vertices.push_back(tempVector);
+	}
+	mesh.set_vertices(vertices);
+
+	for (size_t i = 0; i < UnrealFaces.Num(); i++)
+	{
+		facess.push_back(UnrealFaces[i]);
+	}
+	mesh.set_faces(facess);
+
+	for (size_t i = 0; i < UnrealNormals.Num(); i++)
+	{
+		tempVector.set(UnrealNormals[i].X, UnrealNormals[i].Y, UnrealNormals[i].Z);
+		normals.push_back(tempVector);
+	}
+	mesh.set_normals(normals);
+
+	for (size_t i = 0; i < UnrealFaceNormals.Num(); i++)
+	{
+		faceNormals.push_back(UnrealFaceNormals[i]);
+	}
+	mesh.set_faceNormals(faceNormals);
+
+	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
+
+	node.set_geometry(mesh);
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
