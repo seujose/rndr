@@ -92,13 +92,28 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		LightSphere lightSphere = renderer.newPlugin<LightSphere>();
 		lightSphere.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
 			Vector(0.0, 1.0, 0.0),
-			Vector(0.0, 0.0, 1.0)), Vector(-20.6777, 131.6402, 150)));
+			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 200)));
 		lightSphere.set_color(Color(1.0, 1.0, 1.0));
 		lightSphere.set_intensity(30);
 		lightSphere.set_radius(50);
 		string temp = lightSphere.getName();
 		PluginNameOut = temp.c_str();
 	}
+	break;
+	case EVrayPluginType::ELightRectangle:
+	{
+		LightRectangle lightRectangle = renderer.newPlugin<LightRectangle>();
+		lightRectangle.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
+			Vector(0.0, 1.0, 0.0),
+			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 200)));
+		lightRectangle.set_color(Color(1.0, 1.0, 1.0));
+		lightRectangle.set_intensity(100);
+		lightRectangle.set_u_size(128);
+		lightRectangle.set_v_size(128);
+		string temp = lightRectangle.getName();
+		PluginNameOut = temp.c_str();
+	}
+	break;
 	case EVrayPluginType::EAll:
 		break;
 	default:
