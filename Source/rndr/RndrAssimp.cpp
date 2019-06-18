@@ -27,7 +27,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 bool ARndrAssimp::NewLoadMesh(FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcessPreset_TargetRealtime_MaxQuality);
+	const aiScene* scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath),  aiProcess_Triangulate| aiProcess_JoinIdenticalVertices|aiProcess_FlipWindingOrder);
 
 	for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
 	{
@@ -36,9 +36,9 @@ bool ARndrAssimp::NewLoadMesh(FString FilePath, TArray<FVector>&vertices, TArray
 		theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
 		theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
 
-		theNormal.X = scene->mMeshes[0]->mVertices[i].x;
-		theNormal.Y = scene->mMeshes[0]->mVertices[i].y;
-		theNormal.Z = scene->mMeshes[0]->mVertices[i].z;
+		theNormal.X = scene->mMeshes[0]->mNormals[i].x;
+		theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
+		theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
 		vertices.Push(theVertex);
 		normals.Push(theNormal);
 	}

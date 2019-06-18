@@ -504,7 +504,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-void AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -514,12 +514,61 @@ void AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertice
 	Vector tempVector;
 	if (box)
 	{
+		vertices = { (
+			Vector(-9.84252, -9.84252, 0),
+			Vector(9.84252, -9.84252, 0),
+			Vector(-9.84252, 9.84252, 0),
+			Vector(9.84252, 9.84252, 0),
+			Vector(-9.84252, -9.84252, 19.68504),
+			Vector(9.84252, -9.84252, 19.68504),
+			Vector(-9.84252, 9.84252, 19.68504),
+			Vector(9.84252, 9.84252, 19.68504)
+		) };
+
+		facess = { (0, 2, 3, 3, 1, 0, 4, 5, 7, 7, 6, 4, 0, 1, 5, 5, 4, 0, 1, 3, 7, 7, 5, 1, 3, 2, 6, 6, 7, 3, 2, 0, 4, 4, 6, 2) };
+
+		normals = { (
+			Vector(0, 0, -1),
+			Vector(0, -1, 0),
+			Vector(-1, 0, 0),
+			Vector(0, 0, -1),
+			Vector(0, -1, 0),
+			Vector(1, 0, 0),
+			Vector(0, 0, -1),
+			Vector(0, 1, 0),
+			Vector(-1, 0, 0),
+			Vector(0, 0, -1),
+			Vector(1, 0, -0),
+			Vector(0, 1, 0),
+			Vector(0, 0, 1),
+			Vector(0, -1, 0),
+			Vector(-1, 0, 0),
+			Vector(0, -0, 1),
+			Vector(0, -1, 0),
+			Vector(1, -0, 0),
+			Vector(-0, 0, 1),
+			Vector(0, 1, 0),
+			Vector(-1, -0, -0),
+			Vector(0, 0, 1),
+			Vector(1, 0, 0),
+			Vector(0, 1, 0)
+		) };
+
+		faceNormals = { (0, 6, 9, 9, 3, 0, 12, 15, 21, 21, 18, 12, 1, 4, 16, 16, 13, 1, 5, 10, 22, 22, 17, 5, 11, 7, 19, 19, 23, 11, 8, 2, 14, 14, 20, 8) };
+
+		mesh.set_vertices(vertices);
+		mesh.set_faces(facess);
+		mesh.set_normals(normals);
+		mesh.set_faceNormals(faceNormals);
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
+		node.set_geometry(mesh);
+		return 0;
 	}
 	else
 	{
 		for (size_t i = 0; i < UnrealVertices.Num(); i++)
 		{
-			tempVector.set(UnrealVertices[i].Z, UnrealVertices[i].Y, UnrealVertices[i].Z);
+			tempVector.set(UnrealVertices[i].X, UnrealVertices[i].Y, UnrealVertices[i].Z);
 			vertices.push_back(tempVector);
 		}
 		for (size_t i = 0; i < UnrealFaces.Num(); i++)
@@ -542,6 +591,7 @@ void AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertice
 	mesh.set_faceNormals(faceNormals);
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
 	node.set_geometry(mesh);
+	return 0;
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
@@ -583,6 +633,7 @@ void AVrayInterface::Render(int option)
 			gi.set_on(true);
 			gi.set_primary_engine(2);
 			gi.set_secondary_engine(3);
+
 			
 			renderer.setKeepInteractiveRunning(true);
 			renderer.startSync();
