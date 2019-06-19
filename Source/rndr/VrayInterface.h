@@ -18,6 +18,7 @@ enum class EVrayPluginType : uint8
 	ELightRectangle UMETA(DisplayName = "LightRectangle"),
 	ELightSphere UMETA(DisplayName = "LightSphere"),
 	ECamera UMETA(DisplayName = "Camera"),
+	ESettingsCamera UMETA(DisplayName = "settingsCamera"),
 	EAll UMETA(DisplayName = "All")
 };
 
@@ -28,6 +29,8 @@ class RNDR_API AVrayInterface : public AActor
 public:	
 	AVrayInterface();
 	VRay::VRayRenderer renderer;
+	UFUNCTION(BlueprintCallable, Category = "vray")
+		int32 commit();
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene(FString path);
 	UFUNCTION(BlueprintCallable, Category = "vray")

@@ -168,11 +168,19 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	case EVrayPluginType::ECamera:
 	{
 		//ignora nome, pois somente uma instancia eh permitida
-		CameraPhysical cameraPhysical = renderer.getPlugin<CameraPhysical>("cameraPhysical");
+		CameraPhysical cameraPhysical = renderer.getInstanceOf<CameraPhysical>();
+		cameraPhysical.set_specify_fov(true);
+		cameraPhysical.set_fov(1);
 		plugin = cameraPhysical;
-		plugin.setValue("set_ISO", 60000);
+		renderer.setCamera(cameraPhysical);
+
 	}
 		break;
+	case EVrayPluginType::ESettingsCamera:
+	{
+		SettingsCamera settingsCamera = renderer.getInstanceOf<SettingsCamera>();
+		plugin = settingsCamera;
+	}
 	case EVrayPluginType::EAll:
 		break;
 	default:
@@ -301,6 +309,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s not found"), *ParameterName);
 	}
+
 }
 
 void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
@@ -342,10 +351,14 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	break;
 	case  EVrayPluginType::ECamera:
 	{
-		RenderView renderView = renderer.getPlugin<RenderView>(TCHAR_TO_UTF8(*nameIn));
-		plugin = renderView;
+		plugin = renderer.getInstanceOf<CameraPhysical>();
 	}
 	break;
+
+	case EVrayPluginType::ESettingsCamera:
+	{
+		plugin = renderer.getInstanceOf<SettingsCamera>();
+	}
 	case EVrayPluginType::ELightRectangle:
 	{
 		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
@@ -440,7 +453,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				break;
 			case VRay::TYPE_TEXTUREMATRIX:
 				break;
-			case VRay::TYPE_TEXTURETRANSFORM:
+			case VRay::TYPE_TEXTURETRANSFORM:;
 				break;
 				//case VRay::TYPE_GENERAL_LIST:
 					//break;
@@ -608,6 +621,11 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
+int32 AVrayInterface::commit()
+{
+	return(renderer.commit());
+}
+
 void AVrayInterface::LoadScene(FString path)
 {
 	// "C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
@@ -622,27 +640,33 @@ void AVrayInterface::Render(int option)
 		{
 			
 			VRayRenderer::VFB& vfb = renderer.vfb;
-			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
+			vfb.show(true /*show*/, false /*setFocus*/);     // The window is visible and auto focused
 			vfb.setPositionAndSize(-800, 450, 800, 600);         // Position in screen-space and size in pixels
-			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
+			//vfb.enableInteractivity(false);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
-			size_t numBytes = 0;
-			VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
-			vfb.setState(stateBuffer, numBytes);
+			//size_t numBytes = 0;
+			//VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
+			//vfb.setState(stateBuffer, numBytes);
 
+
+			
 			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
 			gi.set_on(true);
 			gi.set_primary_engine(2);
 			gi.set_secondary_engine(3);
 
-			
-			renderer.setKeepInteractiveRunning(true);
+			renderer.setAutoCommit(true);
 			renderer.startSync();
+			renderer.setKeepInteractiveRunning(true);
+
 		}
 		break;
 		case 1:
 		{
-
+		}
+		break;
+		case 2:
+		{
 		}
 		break;
 	}
