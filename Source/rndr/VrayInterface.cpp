@@ -72,6 +72,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 	case EVrayPluginType::ECamera:
 	{
 		CameraPhysical cameraPhysical = renderer.newPlugin<CameraPhysical>();
+		cameraPhysical.set_exposure(true);
 		RenderView renderView = renderer.getOrCreatePlugin<RenderView>("renderView");
 		renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0),
 			Vector(0.12, -0.3, 0.94),
