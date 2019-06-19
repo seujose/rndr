@@ -73,13 +73,15 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 	{
 		CameraPhysical cameraPhysical = renderer.newPlugin<CameraPhysical>();
 		cameraPhysical.set_exposure(true);
+		string temp = cameraPhysical.getName();
+		PluginNameOut = temp.c_str();
+
 		RenderView renderView = renderer.getOrCreatePlugin<RenderView>("renderView");
 		renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0),
 			Vector(0.12, -0.3, 0.94),
 			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
 		renderView.set_fov(1.65806);
-		string temp = renderView.getName();
-		PluginNameOut = temp.c_str();
+		
 	}
 		break;
 
@@ -164,8 +166,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 	case EVrayPluginType::ECamera:
 	{
-		RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
-		plugin = renderView;
+		plugin = renderer.getPlugin<CameraPhysical>(TCHAR_TO_UTF8(*nameIn));
 	}
 		break;
 	case EVrayPluginType::EAll:
