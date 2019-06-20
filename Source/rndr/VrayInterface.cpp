@@ -614,17 +614,32 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 		PluginName.Push(tempString.c_str());
 	}
 
-	for (size_t i = 0; i <  renderer.getPlugins(); i++)
-	{
 
-
-
-	}
 }
 
-int32 AVrayInterface::commit()
+void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
+	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut)
 {
-	return(renderer.commit());
+	GeomStaticMesh geo = plugin_cast<GeomStaticMesh>(renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName)).get_geometry());
+	FVector temp;
+	for (size_t i = 0; i < geo.get_vertices().size(); i++)
+	{
+		temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y, geo.get_vertices()[i].z);
+		VerticesOut.Push(temp);
+	}
+	for (size_t i = 0; i < geo.get_normals().size(); i++)
+	{
+		temp.Set(geo.get_normals()[i].x, geo.get_normals()[i].y, geo.get_normals()[i].z);
+		NormalsOut.Push(temp);
+	}
+	for (size_t i = 0; i < geo.get_faces().size(); i++)
+	{
+		FacesOut.Push(geo.get_faces()[i]);
+	}
+	for (size_t i = 0; i < geo.get_faceNormals().size(); i++)
+	{
+		facesNormalsOut.Push(geo.get_faceNormals()[i]);
+	}
 }
 
 void AVrayInterface::updateView(TArray<FVector>T)
