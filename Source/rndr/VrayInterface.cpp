@@ -135,19 +135,6 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	bool valueFound;
 	ParamSetSuccessfully = false;
 	Plugin plugin;
-	CameraPhysical physCamera = renderer.getInstanceOrCreate<CameraPhysical>();
-	// And set its property use_moblur
-	physCamera.set_use_moblur(true);
-	physCamera.set_fov(1.8);            // Radians
-	physCamera.set_specify_fov(true);
-	physCamera.set_shutter_speed(1);   // Set shutter speed to 1/1s
-	physCamera.set_f_number(36.0);     // Increase the F-number to compensate the amount of light because of the low shutter speed
-
-	// We also need to create an instance of SettingsMotionBlur class
-	SettingsMotionBlur moBlur = renderer.newPlugin<SettingsMotionBlur>();
-	// And enable motion blur, which is off by default
-	moBlur.set_on(true);
-
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
@@ -179,7 +166,9 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 	case EVrayPluginType::ECamera:
 	{
-		plugin = physCamera;
+		RenderView renderView = renderer.getInstanceOf<RenderView>();
+		renderView.set_fov(0.1);
+		plugin = renderView;
 	}
 		break;
 	case EVrayPluginType::ESettingsCamera:
@@ -356,7 +345,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	break;
 	case  EVrayPluginType::ECamera:
 	{
-		plugin = renderer.getInstanceOf<CameraPhysical>();
+		plugin = renderer.getInstanceOf<RenderView>();
 	}
 	break;
 
@@ -631,11 +620,24 @@ int32 AVrayInterface::commit()
 	return(renderer.commit());
 }
 
+void AVrayInterface::updateView(TArray<FVector>T)
+{
+	VRay::Transform t;
+	t.matrix[0].set(T[0].X, T[0].Y, T[0].Z);
+	t.matrix[1].set(T[1].X, T[1].Y, T[1].Z);
+	t.matrix[2].set(T[2].X, T[2].Y, T[2].Z);
+	t.offset.set(T[3].X, T[3].Y, T[3].Z);
+
+	RenderView renderView = renderer.getInstanceOf<RenderView>();
+	renderView.set_transform(t);
+	//renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0), Vector(0.12, -0.3, 0.94), Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
+}
+
 void AVrayInterface::LoadScene(FString path)
 {
 	// "C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
 	renderer.load(TCHAR_TO_UTF8(*path));
-}
+} 
 
 void AVrayInterface::Render(int option)
 {

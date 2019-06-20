@@ -32,6 +32,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		int32 commit();
 	UFUNCTION(BlueprintCallable, Category = "vray")
+		void updateView(TArray<FVector>T);
+	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene(FString path);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		bool DeletePluginCpp(FString PluginName);
