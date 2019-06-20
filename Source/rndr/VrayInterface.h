@@ -31,7 +31,7 @@ public:
 	VRay::VRayRenderer renderer;
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
-			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut);
+			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, bool reverseNormals);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void updateView(TArray<FVector>T);
 	UFUNCTION(BlueprintCallable, Category = "vray")

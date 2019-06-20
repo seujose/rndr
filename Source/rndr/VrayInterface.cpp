@@ -618,13 +618,20 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 }
 
 void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
-	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut)
+	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, bool reverseNormals)
 {
 	GeomStaticMesh geo = plugin_cast<GeomStaticMesh>(renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName)).get_geometry());
 	FVector temp;
 	for (size_t i = 0; i < geo.get_vertices().size(); i++)
 	{
-		temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y, geo.get_vertices()[i].z);
+		if (reverseNormals)
+		{
+			temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y*-1, geo.get_vertices()[i].z);
+		} 
+		else
+		{
+			temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y, geo.get_vertices()[i].z);
+		}
 		VerticesOut.Push(temp);
 	}
 	for (size_t i = 0; i < geo.get_normals().size(); i++)
@@ -652,7 +659,6 @@ void AVrayInterface::updateView(TArray<FVector>T)
 
 	RenderView renderView = renderer.getInstanceOf<RenderView>();
 	renderView.set_transform(t);
-	//renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0), Vector(0.12, -0.3, 0.94), Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
 }
 
 void AVrayInterface::LoadScene(FString path)
