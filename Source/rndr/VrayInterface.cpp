@@ -613,6 +613,13 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 		tempString = plugin.getName();
 		PluginName.Push(tempString.c_str());
 	}
+
+	for (size_t i = 0; i <  renderer.getPlugins(); i++)
+	{
+
+
+
+	}
 }
 
 int32 AVrayInterface::commit()

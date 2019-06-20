@@ -11,8 +11,7 @@ class RNDR_API ARndrAssimp : public AActor
 	
 public:	
 	ARndrAssimp();
-	UFUNCTION(BlueprintCallable, Category = "Assimp")
-		bool LoadMesh(FString FilePath, FString&ImportError, TArray<FVector>&SectionVertexs, TArray<FVector>&SectionNormals, int32 index, TArray<int32>&facesIndex);
+	 
 	UFUNCTION(BlueprintCallable, Category = "Assimp")
 		bool NewLoadMesh(FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals,TArray<int32>&faces, TArray<int32>&faceNormals);
 	
