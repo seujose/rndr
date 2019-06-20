@@ -135,6 +135,18 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	bool valueFound;
 	ParamSetSuccessfully = false;
 	Plugin plugin;
+	CameraPhysical physCamera = renderer.getInstanceOrCreate<CameraPhysical>();
+	// And set its property use_moblur
+	physCamera.set_use_moblur(true);
+	physCamera.set_fov(1.8);            // Radians
+	physCamera.set_specify_fov(true);
+	physCamera.set_shutter_speed(1);   // Set shutter speed to 1/1s
+	physCamera.set_f_number(36.0);     // Increase the F-number to compensate the amount of light because of the low shutter speed
+
+	// We also need to create an instance of SettingsMotionBlur class
+	SettingsMotionBlur moBlur = renderer.newPlugin<SettingsMotionBlur>();
+	// And enable motion blur, which is off by default
+	moBlur.set_on(true);
 
 	switch (PluginType)
 	{
@@ -167,19 +179,11 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 	case EVrayPluginType::ECamera:
 	{
-		//ignora nome, pois somente uma instancia eh permitida
-		CameraPhysical cameraPhysical = renderer.getInstanceOf<CameraPhysical>();
-		cameraPhysical.set_specify_fov(true);
-		cameraPhysical.set_fov(1);
-		plugin = cameraPhysical;
-		renderer.setCamera(cameraPhysical);
-
+		plugin = physCamera;
 	}
 		break;
 	case EVrayPluginType::ESettingsCamera:
 	{
-		SettingsCamera settingsCamera = renderer.getInstanceOf<SettingsCamera>();
-		plugin = settingsCamera;
 	}
 	case EVrayPluginType::EAll:
 		break;
@@ -200,6 +204,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 		case VRay::TYPE_FLOAT:
 		{
+			 
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), floatArrayIn[0]));
 		}
 		break;
