@@ -667,17 +667,15 @@ void AVrayInterface::Render(int option)
 	{
 		case 0:
 		{
-			
 			VRayRenderer::VFB& vfb = renderer.vfb;
-			vfb.show(true /*show*/, false /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(-800, 450, 800, 600);         // Position in screen-space and size in pixels
-			//vfb.enableInteractivity(false);                  // Whether camera mouse control is enabled
+			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
+			vfb.setPositionAndSize(-800, 450, 640, 640);         // Position in screen-space and size in pixels
+			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
+			renderer.setImageSize(640, 360, true, true);
 			//size_t numBytes = 0;
 			//VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
 			//vfb.setState(stateBuffer, numBytes);
-
-
 			
 			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
 			gi.set_on(true);
@@ -687,15 +685,6 @@ void AVrayInterface::Render(int option)
 			renderer.setAutoCommit(true);
 			renderer.startSync();
 			renderer.setKeepInteractiveRunning(true);
-
-		}
-		break;
-		case 1:
-		{
-		}
-		break;
-		case 2:
-		{
 		}
 		break;
 	}
