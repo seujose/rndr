@@ -306,7 +306,10 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 
 }
 
-void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn, FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName, FString&ParameterValue)
+void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut,
+	TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&tOut, FString nameIn, 
+	FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, 
+	FString ParameterName, FString&ParameterValue)
 {
 	//se ParameterName vazio, retorna os parametros do plugin ignorando plugin type
 	vector<string>propertyNames;
@@ -415,20 +418,15 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				break;
 			case VRay::TYPE_TRANSFORM:
 			{
-				VRay::Transform transform = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
+				VRay::Transform t = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
 				FVector temp;
-				transformOut.Init(temp, 4);
-
-				for (size_t i = 0; i < 2; i++)
-				{
-					transformOut[i].X = transform.matrix[i].x;
-					transformOut[i].Y = transform.matrix[i].y;
-					transformOut[i].Z = transform.matrix[i].z;
-				}
-
-				transformOut[3].X = transform.offset.x;
-				transformOut[3].Y = transform.offset.y;
-				transformOut[3].Z = transform.offset.z;
+				tOut.Init(temp, 4);
+				tOut[0].Set(t.matrix[0].x, t.matrix[0].y, t.matrix[0].z);
+				tOut[1].Set(t.matrix[1].x, t.matrix[1].y, t.matrix[1].z);
+				tOut[2].Set(t.matrix[2].x, t.matrix[2].y, t.matrix[2].z);
+				tOut[3].X = t.offset.x;
+				tOut[3].Y = t.offset.y;
+				tOut[3].Z = t.offset.z;
 			}
 			break;
 			case VRay::TYPE_STRING:
@@ -520,79 +518,26 @@ bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertice
 	vector<Vector>normals;
 	vector<int>faceNormals;
 	Vector tempVector;
-	if (box)
+	 
+	for (size_t i = 0; i < UnrealVertices.Num(); i++)
 	{
-		vertices = { (
-			Vector(-9.84252, -9.84252, 0),
-			Vector(9.84252, -9.84252, 0),
-			Vector(-9.84252, 9.84252, 0),
-			Vector(9.84252, 9.84252, 0),
-			Vector(-9.84252, -9.84252, 19.68504),
-			Vector(9.84252, -9.84252, 19.68504),
-			Vector(-9.84252, 9.84252, 19.68504),
-			Vector(9.84252, 9.84252, 19.68504)
-		) };
-
-		facess = { (0, 2, 3, 3, 1, 0, 4, 5, 7, 7, 6, 4, 0, 1, 5, 5, 4, 0, 1, 3, 7, 7, 5, 1, 3, 2, 6, 6, 7, 3, 2, 0, 4, 4, 6, 2) };
-
-		normals = { (
-			Vector(0, 0, -1),
-			Vector(0, -1, 0),
-			Vector(-1, 0, 0),
-			Vector(0, 0, -1),
-			Vector(0, -1, 0),
-			Vector(1, 0, 0),
-			Vector(0, 0, -1),
-			Vector(0, 1, 0),
-			Vector(-1, 0, 0),
-			Vector(0, 0, -1),
-			Vector(1, 0, -0),
-			Vector(0, 1, 0),
-			Vector(0, 0, 1),
-			Vector(0, -1, 0),
-			Vector(-1, 0, 0),
-			Vector(0, -0, 1),
-			Vector(0, -1, 0),
-			Vector(1, -0, 0),
-			Vector(-0, 0, 1),
-			Vector(0, 1, 0),
-			Vector(-1, -0, -0),
-			Vector(0, 0, 1),
-			Vector(1, 0, 0),
-			Vector(0, 1, 0)
-		) };
-
-		faceNormals = { (0, 6, 9, 9, 3, 0, 12, 15, 21, 21, 18, 12, 1, 4, 16, 16, 13, 1, 5, 10, 22, 22, 17, 5, 11, 7, 19, 19, 23, 11, 8, 2, 14, 14, 20, 8) };
-
-		mesh.set_vertices(vertices);
-		mesh.set_faces(facess);
-		mesh.set_normals(normals);
-		mesh.set_faceNormals(faceNormals);
-		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
-		node.set_geometry(mesh);
-		return 0;
+		tempVector.set(UnrealVertices[i].X, UnrealVertices[i].Y, UnrealVertices[i].Z);
+		vertices.push_back(tempVector);
 	}
-	else
-	{
-		for (size_t i = 0; i < UnrealVertices.Num(); i++)
-		{
-			tempVector.set(UnrealVertices[i].X, UnrealVertices[i].Y, UnrealVertices[i].Z);
-			vertices.push_back(tempVector);
-		}
-		for (size_t i = 0; i < UnrealFaces.Num(); i++)
+	for (size_t i = 0; i < UnrealFaces.Num(); i++)
 	{
 		facess.push_back(UnrealFaces[i]);
 	}
-		for (size_t i = 0; i < UnrealNormals.Num(); i++)
+	for (size_t i = 0; i < UnrealNormals.Num(); i++)
 	{
 		tempVector.set(UnrealNormals[i].X, UnrealNormals[i].Y, UnrealNormals[i].Z);
 		normals.push_back(tempVector);
 	}
-		for (size_t i = 0; i < UnrealFaceNormals.Num(); i++)
+	for (size_t i = 0; i < UnrealFaceNormals.Num(); i++)
 	{
 		faceNormals.push_back(UnrealFaceNormals[i]);
 	}
-	}
+
 	mesh.set_vertices(vertices);
 	mesh.set_faces(facess);
 	mesh.set_normals(normals);
