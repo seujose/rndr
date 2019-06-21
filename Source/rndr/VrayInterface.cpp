@@ -566,31 +566,21 @@ void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut,
 	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, bool reverseNormals)
 {
 	GeomStaticMesh geo = plugin_cast<GeomStaticMesh>(renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName)).get_geometry());
-	FVector temp;
-	for (size_t i = 0; i < geo.get_vertices().size(); i++)
+	for (const Vector&i:geo.get_vertices())
 	{
-		if (reverseNormals)
-		{
-			temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y*-1, geo.get_vertices()[i].z);
-		} 
-		else
-		{
-			temp.Set(geo.get_vertices()[i].x, geo.get_vertices()[i].y, geo.get_vertices()[i].z);
-		}
-		VerticesOut.Push(temp);
+		VerticesOut.Add({ i.x, i.y, i.z });
 	}
-	for (size_t i = 0; i < geo.get_normals().size(); i++)
+	for (const Vector&i : geo.get_normals())
 	{
-		temp.Set(geo.get_normals()[i].x, geo.get_normals()[i].y, geo.get_normals()[i].z);
-		NormalsOut.Push(temp);
+		NormalsOut.Add({ i.x, i.y, i.z });
 	}
-	for (size_t i = 0; i < geo.get_faces().size(); i++)
+	for (const int&i : geo.get_faces())
 	{
-		FacesOut.Push(geo.get_faces()[i]);
+		FacesOut.Add(i);
 	}
-	for (size_t i = 0; i < geo.get_faceNormals().size(); i++)
+	for (const int&i : geo.get_faceNormals())
 	{
-		facesNormalsOut.Push(geo.get_faceNormals()[i]);
+		facesNormalsOut.Add(i);
 	}
 
 }
