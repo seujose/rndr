@@ -592,6 +592,7 @@ void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut,
 	{
 		facesNormalsOut.Push(geo.get_faceNormals()[i]);
 	}
+
 }
 
 void AVrayInterface::updateView(TArray<FVector>T)
