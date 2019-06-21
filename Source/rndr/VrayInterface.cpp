@@ -619,6 +619,7 @@ void AVrayInterface::Render(int option)
 	{
 		case 0:
 		{
+			//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=221
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
 			vfb.setPositionAndSize(-800, 450, 640, 640);         // Position in screen-space and size in pixels
@@ -628,12 +629,16 @@ void AVrayInterface::Render(int option)
 			//size_t numBytes = 0;
 			//VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
 			//vfb.setState(stateBuffer, numBytes);
-			
+
+			SettingsRTEngine rtEngine=renderer.getInstanceOrCreate<SettingsRTEngine>();
+			rtEngine.set_undersampling(5);
+		
 			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
 			gi.set_on(true);
 			gi.set_primary_engine(2);
 			gi.set_secondary_engine(3);
 
+			renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE_CUDA);
 			renderer.setAutoCommit(true);
 			renderer.startSync();
 			renderer.setKeepInteractiveRunning(true);
