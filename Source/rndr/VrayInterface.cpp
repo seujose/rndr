@@ -32,13 +32,6 @@ void AVrayInterface::Tick(float DeltaTime)
 
 }
 
-/************************************************************************/
-/* forward declarations                                                 */
-/************************************************************************/
-/**************************************\\**********************************/
-/* implementations                                                      */
-/************************************************************************/
-
 void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
 {
 	switch (PluginType)
@@ -429,6 +422,10 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 			case VRay::TYPE_STRING:
 				break;
 			case VRay::TYPE_PLUGIN:
+			{
+				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getPlugin().getName();
+				ParamTypeOut.Push(tempString.c_str());
+			}
 				break;
 			case VRay::TYPE_TEXTURE:
 				break;
@@ -490,19 +487,20 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		}
 		else
 		{
-			propertyNamesOut.Empty();
-			PropertyValuesOut.Empty();
-			ParamTypeOut.Empty();
-			PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
-			propertyNames = pluginMeta.getPropertyNames();
-			for (size_t i = 0; i < propertyNames.size(); i++)
-			{
-				propertyNamesOut.Push(propertyNames[i].c_str());
-				tempString = plugin.getValueAsString(propertyNames[i]);
-				PropertyValuesOut.Push(tempString.c_str());
-				tempString = plugin.getValue(propertyNames[i]).getStringType();
-				ParamTypeOut.Push(tempString.c_str());
-			}
+
+		propertyNamesOut.Empty();
+		PropertyValuesOut.Empty();
+		ParamTypeOut.Empty();
+		PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
+		propertyNames = pluginMeta.getPropertyNames();
+		for (size_t i = 0; i < propertyNames.size(); i++)
+		{
+			propertyNamesOut.Push(propertyNames[i].c_str());
+			tempString = plugin.getValueAsString(propertyNames[i]);
+			PropertyValuesOut.Push(tempString.c_str());
+			tempString = plugin.getValue(propertyNames[i]).getStringType();
+			ParamTypeOut.Push(tempString.c_str());
+		}
 		}
 	}
 }
