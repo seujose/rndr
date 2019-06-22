@@ -17,9 +17,9 @@ enum class EVrayPluginType : uint8
 	EBRDF UMETA(DisplayName = "BRDF"),
 	ELightRectangle UMETA(DisplayName = "LightRectangle"),
 	ELightSphere UMETA(DisplayName = "LightSphere"),
-	ECamera UMETA(DisplayName = "Camera"),
-	ESettingsCamera UMETA(DisplayName = "settingsCamera"),
-	EAll UMETA(DisplayName = "All")
+	ERenderView UMETA(DisplayName = "RenderView"),
+	EPhysicalCamera UMETA(DisplayName = "PhysicalCamera"),
+	EGenericPlugin UMETA(DisplayName = "GenericPlugin")
 };
 
 UCLASS()

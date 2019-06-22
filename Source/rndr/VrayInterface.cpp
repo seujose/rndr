@@ -69,7 +69,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		PluginNameOut = temp.c_str();
 	}
 		break;
-	case EVrayPluginType::ECamera:
+	case EVrayPluginType::ERenderView:
 	{
 		//somente uma instancia
 		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>("cameraPhysical");
@@ -113,7 +113,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		PluginNameOut = temp.c_str();
 	}
 	break;
-	case EVrayPluginType::EAll:
+	case EVrayPluginType::EGenericPlugin:
 		break;
 	default:
 		break;
@@ -164,17 +164,20 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		plugin = bRDFVRayMtl;
 	}
 		break;
-	case EVrayPluginType::ECamera:
+	case EVrayPluginType::ERenderView:
 	{
 		RenderView renderView = renderer.getInstanceOf<RenderView>();
 		renderView.set_fov(0.1);
 		plugin = renderView;
 	}
 		break;
-	case EVrayPluginType::ESettingsCamera:
+	case EVrayPluginType::EPhysicalCamera:
 	{
 	}
-	case EVrayPluginType::EAll:
+	case EVrayPluginType::EGenericPlugin:
+	{
+		plugin = renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
+	}
 		break;
 	default:
 		break;
@@ -346,13 +349,13 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		plugin = lightSphere;
 	}
 	break;
-	case  EVrayPluginType::ECamera:
+	case  EVrayPluginType::ERenderView:
 	{
 		plugin = renderer.getInstanceOf<RenderView>();
 	}
 	break;
 
-	case EVrayPluginType::ESettingsCamera:
+	case EVrayPluginType::EPhysicalCamera:
 	{
 		plugin = renderer.getInstanceOf<SettingsCamera>();
 	}
@@ -362,15 +365,9 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		plugin = lightRectangle;
 	}
 	break;
-	case EVrayPluginType::EAll:
+	case EVrayPluginType::EGenericPlugin:
 	{
-		UE_LOG(LogTemp, Warning, TEXT("listing all plugins: "));
-		for (const Plugin&plugin : renderer.getPlugins())
-		{
-			tempString = plugin.getName();
-			tempFString = tempString.c_str();
-			UE_LOG(LogTemp, Warning, TEXT("(%s)"),*tempFString);
-		}
+		plugin = renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
 	}
 	break;
 	}
@@ -416,7 +413,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 			break;
 			case VRay::TYPE_MATRIX:
 				break;
-			case VRay::TYPE_TRANSFORM:
+			case VRay::TYPE_TRANSFORM://#otimizar
 			{
 				VRay::Transform t = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
 				FVector temp;
