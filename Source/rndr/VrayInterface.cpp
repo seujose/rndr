@@ -313,6 +313,9 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	FString tempFString;
 	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
+	
+
+
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
@@ -394,7 +397,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				colorOut.G = color.g;
 				colorOut.B = color.b;
 			}
-			break;
+			break; 
 			case VRay::TYPE_ACOLOR:
 			{
 				AColor acolor = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getAColor();
@@ -402,6 +405,9 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				colorOut.G = acolor.color.g;
 				colorOut.B = acolor.color.b;
 				colorOut.A = acolor.alpha;
+
+				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getStringType();
+				ParamTypeOut.Push(tempString.c_str());
 			}
 			break;
 			case VRay::TYPE_MATRIX:
@@ -423,8 +429,12 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				break;
 			case VRay::TYPE_PLUGIN:
 			{
-				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getPlugin().getName();
+				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getStringType();
 				ParamTypeOut.Push(tempString.c_str());
+
+
+				//tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getPlugin().getName();
+				//ParamTypeOut.Push(tempString.c_str());
 			}
 				break;
 			case VRay::TYPE_TEXTURE:
@@ -488,9 +498,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		else
 		{
 
-		propertyNamesOut.Empty();
-		PropertyValuesOut.Empty();
-		ParamTypeOut.Empty();
+
 		PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
 		propertyNames = pluginMeta.getPropertyNames();
 		for (size_t i = 0; i < propertyNames.size(); i++)
