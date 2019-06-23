@@ -565,10 +565,12 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 
 }
 
-void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
-	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, bool reverseNormals)
+void AVrayInterface::getGeoInfo(int32 mapChannelIndex, FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
+	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVOut, bool reverseNormals)
 {
 	GeomStaticMesh geo = plugin_cast<GeomStaticMesh>(renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName)).get_geometry());
+	VectorList mapChannelVertices;
+	mapChannelVertices = geo.get_map_channels()[mapChannelIndex][1].as<VectorList>();
 	for (const Vector&i:geo.get_vertices())
 	{
 		VerticesOut.Add({ i.x, i.y, i.z });
@@ -585,7 +587,10 @@ void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut,
 	{
 		facesNormalsOut.Add(i);
 	}
-
+	for (const Vector&i:mapChannelVertices)
+	{
+		UVOut.Add({ i.x, i.y });
+	}
 }
 
 void AVrayInterface::updateView(TArray<FVector>T)
