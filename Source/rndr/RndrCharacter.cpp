@@ -2,6 +2,7 @@
 
 
 #include "RndrCharacter.h"
+#include <CollisionQueryParams.h>
 
 // Sets default values
 ARndrCharacter::ARndrCharacter()
@@ -9,6 +10,23 @@ ARndrCharacter::ARndrCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+bool ARndrCharacter::MaTrace(AActor*actorToIgnore, const FVector&start, const FVector&end, 
+	FHitResult&hitOut, ECollisionChannel collisoinChannel/*=ECC_Pawn*/)
+{
+ 
+	FCollisionQueryParams TraceParams(FName(TEXT("VictoreCore Trace")), true, actorToIgnore);
+	TraceParams.bTraceComplex = true;
+	TraceParams.bReturnFaceIndex = true;
+
+	TraceParams.AddIgnoredActor(actorToIgnore);
+
+	hitOut = FHitResult(ForceInit);
+	this->GetWorld()->LineTraceSingleByChannel(hitOut, start, end, collisoinChannel, TraceParams);
+
+
+	return (hitOut.GetActor()!=NULL);
 }
 
 // Called when the game starts or when spawned

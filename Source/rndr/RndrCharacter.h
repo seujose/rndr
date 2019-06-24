@@ -14,6 +14,11 @@ class RNDR_API ARndrCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ARndrCharacter();
+	UFUNCTION(BlueprintCallable, Category = "rndr")
+	bool MaTrace(AActor*actorToIgnore, const FVector&start, const FVector&end, FHitResult&hitOut,
+		ECollisionChannel collisoinChannel=ECC_Pawn);
+
+
 
 protected:
 	// Called when the game starts or when spawned
