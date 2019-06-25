@@ -35,4 +35,6 @@
 Binaries/*
 Intermediate/*
 Saved/*
-
+DerivedDataCache/*
+enc_temp_folder/*
+*.png

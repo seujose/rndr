@@ -587,12 +587,10 @@ void AVrayInterface::getGeoInfo(int32 mapChannelIndex, FString PluginName, TArra
 	{
 		facesNormalsOut.Add(i);
 	}
-
 	for (const Vector&i:mapChannelVertices)
 	{
 		UVOut.Add({ i.x, i.y });
 	}
-
 	for (const int&i : mapChannelfaces)
 	{
 		mapChannelfacesOut.Add(i);
@@ -609,6 +607,33 @@ void AVrayInterface::updateView(TArray<FVector>T)
 
 	RenderView renderView = renderer.getInstanceOf<RenderView>();
 	renderView.set_transform(t);
+}
+
+void AVrayInterface::bakeAnode(FString nodeName)
+{
+	BakeView theBaker = renderer.newPlugin<BakeView>();
+	Node theTarget = renderer.getPlugins<Node>()[0];//smente 1 alvo
+	theBaker.set_bake_node(theTarget);
+	UVWGenChannel theUVs = renderer.newPlugin<UVWGenChannel>();
+	theUVs.set_uvw_channel(2);
+	//theBaker.set_mapped_bake_uvwgens()
+	theBaker.set_bake_uvwgen(theUVs);
+	ValueList theTargetNodeList;
+	theTargetNodeList.push_back((Value(theTarget)));
+	theBaker.set_target_nodes(theTargetNodeList);
+	theBaker.set_dilation(2);
+	theBaker.set_u_min(0);
+	theBaker.set_v_min(0);
+	theBaker.set_u_max(1);
+	theBaker.set_v_max(1);
+	string basePath = "C:/rndr/baked_";
+	string baseName = string(TCHAR_TO_UTF8(*nodeName));
+	string finalPath = basePath + baseName+".png";
+	RenderElements reManager = renderer.getRenderElements();
+	reManager.add(RenderElement::RAWTOTALLIGHT, NULL, NULL);
+	renderer.startSync();
+	renderer.waitForRenderEnd(5000);
+	renderer.vfb.saveImage(finalPath);
 }
 
 void AVrayInterface::LoadScene(FString path)
