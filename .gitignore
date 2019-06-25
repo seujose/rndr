@@ -37,4 +37,6 @@ Intermediate/*
 Saved/*
 DerivedDataCache/*
 enc_temp_folder/*
+Plugins/VictoryPlugin/Intermediate/*
+Plugins/VictoryPlugin/Binaries/*
 *.png
