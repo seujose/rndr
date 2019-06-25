@@ -43,7 +43,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void Render(int option);
+		void Render(int option, int renderMode);
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")

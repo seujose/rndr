@@ -160,13 +160,17 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	case EVrayPluginType::ERenderView:
 	{
 		RenderView renderView = renderer.getInstanceOf<RenderView>();
-		renderView.set_fov(0.1);
 		plugin = renderView;
 	}
 		break;
+
 	case EVrayPluginType::EPhysicalCamera:
 	{
+		CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
+		plugin = cameraPhysical;
 	}
+	break;
+
 	case EVrayPluginType::EGenericPlugin:
 	{
 		plugin = renderer.getPlugin(TCHAR_TO_UTF8(*nameIn));
@@ -353,8 +357,9 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 
 	case EVrayPluginType::EPhysicalCamera:
 	{
-		plugin = renderer.getInstanceOf<SettingsCamera>();
+		plugin = renderer.getInstanceOf< CameraPhysical>();
 	}
+	break;
 	case EVrayPluginType::ELightRectangle:
 	{
 		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
@@ -645,13 +650,16 @@ void AVrayInterface::LoadScene(FString path)
 	renderer.load(TCHAR_TO_UTF8(*path));
 } 
 
-void AVrayInterface::Render(int option)
+void AVrayInterface::Render(int option, int renderMode)
 {
 	switch (option)
 	{
 		case 0:
 		{
 			//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=221
+
+			
+			renderer.stop();
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
 			vfb.setPositionAndSize(-800, 450, 640, 640);         // Position in screen-space and size in pixels
@@ -669,8 +677,32 @@ void AVrayInterface::Render(int option)
 			gi.set_on(true);
 			gi.set_primary_engine(2);
 			gi.set_secondary_engine(3);
+			
+			CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
+			cameraPhysical.set_exposure(true);
 
-			renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE_CUDA);
+			switch (renderMode)
+			{
+			default:
+			{
+				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE);
+			}
+			break;
+			
+			case 0:
+			{
+				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE);
+			}
+			break;
+
+			case 1:
+			{
+				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE_CUDA);
+			}
+			break;
+
+			}
+			
 			renderer.setAutoCommit(true);
 			renderer.startSync();
 			renderer.setKeepInteractiveRunning(true);
