@@ -611,8 +611,11 @@ void AVrayInterface::updateView(TArray<FVector>T)
 
 void AVrayInterface::bakeAnode(FString nodeName)
 {
+	renderer.stop();
+	renderer.setRenderMode(VRayRenderer::RENDER_MODE_PRODUCTION);
 	BakeView theBaker = renderer.newPlugin<BakeView>();
-	Node theTarget = renderer.getPlugins<Node>()[0];//smente 1 alvo
+	//Node theTarget = renderer.getPlugins<Node>()[0];//smente 1 alvo
+	Node theTarget = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	theBaker.set_bake_node(theTarget);
 	UVWGenChannel theUVs = renderer.newPlugin<UVWGenChannel>();
 	theUVs.set_uvw_channel(2);
