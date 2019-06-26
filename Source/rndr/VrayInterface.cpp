@@ -570,12 +570,11 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 
 }
 
-void AVrayInterface::getGeoInfo(int32 mapChannelIndex, FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
-	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVOut, bool reverseNormals, TArray<int32>&mapChannelfacesOut)
+void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
+	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, bool reverseNormals, TArray<int32>&mapChannelfacesOut)
 {
 	GeomStaticMesh geo = plugin_cast<GeomStaticMesh>(renderer.getPlugin<Node>(TCHAR_TO_UTF8(*PluginName)).get_geometry());
-	VectorList mapChannelVertices = geo.get_map_channels()[mapChannelIndex][1].as<VectorList>();
-	IntList mapChannelfaces = geo.get_map_channels()[mapChannelIndex][2].as<IntList>();
+	
 	for (const Vector&i:geo.get_vertices())
 	{
 		VerticesOut.Add({ i.x, i.y*-1, i.z });
@@ -592,13 +591,34 @@ void AVrayInterface::getGeoInfo(int32 mapChannelIndex, FString PluginName, TArra
 	{
 		facesNormalsOut.Add(i);
 	}
-	for (const Vector&i:mapChannelVertices)
+	if (geo.get_map_channels().size() > 0)
 	{
-		UVOut.Add({ i.x, i.y });
-	}
-	for (const int&i : mapChannelfaces)
-	{
-		mapChannelfacesOut.Add(i);
+		switch (geo.get_map_channels().size())
+		{
+		case 2:
+		{
+			VectorList mapChannelVerticesZero = geo.get_map_channels()[0][1].as<VectorList>();
+			for (const Vector&i : mapChannelVerticesZero)
+			{
+				UVZeroOut.Add({ i.x, i.y });
+			}
+			VectorList mapChannelVerticesOne = geo.get_map_channels()[1][1].as<VectorList>();
+			for (const Vector&i : mapChannelVerticesOne)
+			{
+				UVOneOut.Add({ i.x, i.y });
+			}
+		}
+		break;
+		case 1:
+		{
+			VectorList mapChannelVerticesZero = geo.get_map_channels()[0][1].as<VectorList>();
+			for (const Vector&i : mapChannelVerticesZero)
+			{
+				UVZeroOut.Add({ i.x, i.y });
+			}
+		}
+		break;
+		}
 	}
 }
 

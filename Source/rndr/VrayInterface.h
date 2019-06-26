@@ -30,8 +30,8 @@ public:
 	AVrayInterface();
 	VRay::VRayRenderer renderer;
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void getGeoInfo(int32 mapChannelIndex, FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
-			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVOut, bool reverseNormals, TArray<int32>&mapChannelfacesOut);
+		void getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
+			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, bool reverseNormals, TArray<int32>&mapChannelfacesOut);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void updateView(TArray<FVector>T);
 	UFUNCTION(BlueprintCallable, Category = "vray")
