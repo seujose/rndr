@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "RndrCharacter.generated.h"
-
+//class UEditableMesh;
 UCLASS()
 class RNDR_API ARndrCharacter : public ACharacter
 {
@@ -17,7 +17,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "rndr")
 	bool MaTrace(AActor*actorToIgnore, const FVector&start, const FVector&end, FHitResult&hitOut,
 		ECollisionChannel collisoinChannel=ECC_Pawn);
-
 
 
 protected:
