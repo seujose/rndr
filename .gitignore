@@ -32,6 +32,9 @@
 *.app
 
 .vs/*
+Content/box.uasset
+Content/plane.uasset
+Content/teapot.uasset
 Binaries/*
 Intermediate/*
 Saved/*
