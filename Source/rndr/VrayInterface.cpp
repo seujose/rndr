@@ -677,12 +677,10 @@ void AVrayInterface::Render(int option, int renderMode)
 		case 0:
 		{
 			//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=221
-
-			
 			renderer.stop();
 			VRayRenderer::VFB& vfb = renderer.vfb;
 			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(-800, 450, 640, 640);         // Position in screen-space and size in pixels
+			vfb.setPositionAndSize(1080, 950, 640, 640);         // Position in screen-space and size in pixels
 			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
 			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
 			renderer.setImageSize(640, 360, true, true);
