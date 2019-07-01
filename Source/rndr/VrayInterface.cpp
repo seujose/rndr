@@ -11,13 +11,24 @@ using namespace VRay;
 using namespace VRay::Plugins;
 using namespace std;
 
-void fn_render(VRayRenderer&renderer, int32 renderMode)
+void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float noise, string pathToSave)
 {
 	renderer.stop();
 	VRayRenderer::VFB& vfb = renderer.vfb;
 	vfb.enableProgressBar(true);
 	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-	vfb.setPositionAndSize(1080, 950, 512, 512);         // Position in screen-space and size in pixels
+	vfb.setPositionAndSize(1080, 950, 640, 640);         // Position in screen-space and size in pixels
+	vfb.enableInteractivity(true);
+	vfb.setAlwaysOnTop(true);
+	renderer.setImageSize(512, 512, true, true);
+	SettingsRTEngine settingsRTEngine = renderer.getInstanceOrCreate<SettingsRTEngine>();
+	settingsRTEngine.set_undersampling(5);
+	SettingsGI settingsGI = renderer.getInstanceOrCreate<SettingsGI>();
+	settingsGI.set_on(true);
+	settingsGI.set_primary_engine(2);
+	settingsGI.set_secondary_engine(3);
+	CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
+	cameraPhysical.set_exposure(true);
 
 	switch (renderMode)
 	{
@@ -50,9 +61,12 @@ void fn_render(VRayRenderer&renderer, int32 renderMode)
 	break;
 
 	}
+	renderer.setInteractiveTimeout(timeToStop);
+	renderer.setInteractiveNoiseThreshold(noise);
 	renderer.setAutoCommit(true);
 	renderer.startSync();
 	renderer.setKeepInteractiveRunning(true);
+	renderer.vfb.saveImage(pathToSave);
 }
 
 
@@ -69,6 +83,7 @@ AVrayInterface::AVrayInterface()
 void AVrayInterface::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 void AVrayInterface::Tick(float DeltaTime)
@@ -681,6 +696,12 @@ void AVrayInterface::updateView(TArray<FVector>T)
 
 void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 {
+	RenderElements reManager = renderer.getRenderElements();
+	
+	if ((reManager.getAll(RenderElement::RAWLIGHT).size()) ==0)
+	{
+		reManager.add(RenderElement::RAWLIGHT, NULL, NULL);
+	}
 	BakeView theBaker = renderer.newPlugin<BakeView>();
 	Node theTarget = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	theBaker.set_bake_node(theTarget);
@@ -698,12 +719,8 @@ void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 	string basePath = "C:/rndr/baked_";
 	string baseName = string(TCHAR_TO_UTF8(*nodeName));
 	string finalPath = basePath + baseName+".png";
-	RenderElements reManager = renderer.getRenderElements();
-	reManager.add(RenderElement::RAWTOTALLIGHT, NULL, NULL);
-	reManager.add(RenderElement::RAWLIGHT, NULL, NULL);
-	reManager.add(RenderElement::RAWGI, NULL, NULL);
-	renderer.vfb.saveImage(finalPath);
-	fn_render(renderer, renderMode);
+	fn_render(renderer, renderMode, 5000, 0.1, finalPath);
+	
 }
 
 void AVrayInterface::LoadScene(FString path)
@@ -713,7 +730,9 @@ void AVrayInterface::LoadScene(FString path)
 
 void AVrayInterface::Render(int renderMode)
 {
-	fn_render(renderer, renderMode);
+	string basePath = "C:/rndr/baked_";
+	string finalPath = basePath+ ".png";
+	fn_render(renderer, renderMode, 0, 0.1, finalPath);
 }
 
 
