@@ -659,6 +659,8 @@ void AVrayInterface::bakeAnode(FString nodeName)
 	string finalPath = basePath + baseName+".png";
 	RenderElements reManager = renderer.getRenderElements();
 	reManager.add(RenderElement::RAWTOTALLIGHT, NULL, NULL);
+	reManager.add(RenderElement::RAWLIGHT, NULL, NULL);
+	reManager.add(RenderElement::RAWGI, NULL, NULL);
 	renderer.startSync();
 	renderer.waitForRenderEnd(5000);
 	renderer.vfb.saveImage(finalPath);
