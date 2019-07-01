@@ -7,10 +7,55 @@
 #include <vector>
 #include <string>
 #include "VrayInterface.h"
-
 using namespace VRay;
 using namespace VRay::Plugins;
 using namespace std;
+
+void fn_render(VRayRenderer&renderer, int32 renderMode)
+{
+	renderer.stop();
+	VRayRenderer::VFB& vfb = renderer.vfb;
+	vfb.enableProgressBar(true);
+	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
+	vfb.setPositionAndSize(1080, 950, 512, 512);         // Position in screen-space and size in pixels
+
+	switch (renderMode)
+	{
+	case 0:
+	{
+		renderer.setRenderMode(VRayRenderer::RENDER_MODE_PRODUCTION);
+		UE_LOG(LogTemp, Warning, TEXT("RENDER_MODE_PRODUCTION"));
+	}
+	break;
+
+	case 1:
+	{
+		renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE);
+		UE_LOG(LogTemp, Warning, TEXT("RENDER_MODE_INTERACTIVE"));
+	}
+	break;
+
+	case 2:
+	{
+		renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE_CUDA);
+		UE_LOG(LogTemp, Warning, TEXT("RENDER_MODE_INTERACTIVE_CUDA"));
+	}
+	break;
+
+	case 3:
+	{
+		renderer.setRenderMode(VRayRenderer::RENDER_MODE_PRODUCTION_CUDA);
+		UE_LOG(LogTemp, Warning, TEXT("RENDER_MODE_PRODUCTION_CUDA"));
+	}
+	break;
+
+	}
+	renderer.setAutoCommit(true);
+	renderer.startSync();
+	renderer.setKeepInteractiveRunning(true);
+}
+
+
 
 VRay::VRayInit init(true);
 //RendererOptions options;
@@ -634,17 +679,13 @@ void AVrayInterface::updateView(TArray<FVector>T)
 	renderView.set_transform(t);
 }
 
-void AVrayInterface::bakeAnode(FString nodeName)
+void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 {
-	renderer.stop();
-	renderer.setRenderMode(VRayRenderer::RENDER_MODE_PRODUCTION);
 	BakeView theBaker = renderer.newPlugin<BakeView>();
-	//Node theTarget = renderer.getPlugins<Node>()[0];//smente 1 alvo
 	Node theTarget = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	theBaker.set_bake_node(theTarget);
 	UVWGenChannel theUVs = renderer.newPlugin<UVWGenChannel>();
 	theUVs.set_uvw_channel(2);
-	//theBaker.set_mapped_bake_uvwgens()
 	theBaker.set_bake_uvwgen(theUVs);
 	ValueList theTargetNodeList;
 	theTargetNodeList.push_back((Value(theTarget)));
@@ -661,74 +702,18 @@ void AVrayInterface::bakeAnode(FString nodeName)
 	reManager.add(RenderElement::RAWTOTALLIGHT, NULL, NULL);
 	reManager.add(RenderElement::RAWLIGHT, NULL, NULL);
 	reManager.add(RenderElement::RAWGI, NULL, NULL);
-	renderer.startSync();
-	renderer.waitForRenderEnd(5000);
 	renderer.vfb.saveImage(finalPath);
+	fn_render(renderer, renderMode);
 }
 
 void AVrayInterface::LoadScene(FString path)
 {
-	// "C:\\Users\\master\\Documents\\3ds Max 2020\\scenes\\cenaBase.vrscene");
 	renderer.load(TCHAR_TO_UTF8(*path));
 } 
 
-void AVrayInterface::Render(int option, int renderMode)
+void AVrayInterface::Render(int renderMode)
 {
-	switch (option)
-	{
-		case 0:
-		{
-			//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=221
-			renderer.stop();
-			VRayRenderer::VFB& vfb = renderer.vfb;
-			vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-			vfb.setPositionAndSize(1080, 950, 640, 640);         // Position in screen-space and size in pixels
-			vfb.enableInteractivity(true);                  // Whether camera mouse control is enabled
-			vfb.setAlwaysOnTop(true);                       // Toggles always-on-top window behavior
-			renderer.setImageSize(640, 360, true, true);
-			//size_t numBytes = 0;
-			//VFBState *stateBuffer = vfb.getState(numBytes); // Can be used to save serialized window state
-			//vfb.setState(stateBuffer, numBytes);
-
-			SettingsRTEngine rtEngine=renderer.getInstanceOrCreate<SettingsRTEngine>();
-			rtEngine.set_undersampling(5);
-		
-			SettingsGI gi = renderer.getInstanceOrCreate<SettingsGI>();
-			gi.set_on(true);
-			gi.set_primary_engine(2);
-			gi.set_secondary_engine(3);
-			
-			CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
-			cameraPhysical.set_exposure(true);
-
-			switch (renderMode)
-			{
-			default:
-			{
-				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE);
-			}
-			break;
-			
-			case 0:
-			{
-				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE);
-			}
-			break;
-
-			case 1:
-			{
-				renderer.setRenderMode(VRayRenderer::RENDER_MODE_INTERACTIVE_CUDA);
-			}
-			break;
-
-			}
-			
-			renderer.setAutoCommit(true);
-			renderer.startSync();
-			renderer.setKeepInteractiveRunning(true);
-		}
-		break;
-	}
+	fn_render(renderer, renderMode);
 }
 
 

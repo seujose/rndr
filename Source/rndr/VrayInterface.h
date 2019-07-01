@@ -28,14 +28,16 @@ class RNDR_API AVrayInterface : public AActor
 	GENERATED_BODY()
 public:	
 	AVrayInterface();
+
 	VRay::VRayRenderer renderer;
+
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
 			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, bool reverseNormals, TArray<int32>&mapChannelfacesOut);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void updateView(TArray<FVector>T);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void bakeAnode(FString nodeName);
+		void bakeAnode(FString nodeName, int32 mode);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene(FString path);
 	UFUNCTION(BlueprintCallable, Category = "vray")
@@ -43,7 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void Render(int option, int renderMode);
+		void Render(int renderMode);
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
