@@ -13,7 +13,7 @@ public:
 	ARndrAssimp();
 	 
 	UFUNCTION(BlueprintCallable, Category = "Assimp")
-		bool NewLoadMesh(FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals,TArray<int32>&faces, TArray<int32>&faceNormals);
+		bool getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals);
 	
 protected:
 	virtual void BeginPlay() override;
