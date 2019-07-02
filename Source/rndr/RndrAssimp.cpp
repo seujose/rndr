@@ -24,10 +24,31 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals)
+bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath),  aiProcess_Triangulate| aiProcess_JoinIdenticalVertices|aiProcess_FlipWindingOrder);
+	const aiScene*scene=nullptr;
+	switch (importSwitch)
+	{
+	case 1:
+	{
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+	}
+	break;
+		
+	case 2:
+	{
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcessPreset_TargetRealtime_MaxQuality);
+	}
+	break;
+
+	case 3:
+	{
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices|aiProcess_FlipUVs|aiProcess_MakeLeftHanded);
+	}
+	break;
+
+	}
 	if (scene!=NULL)
 	{
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
@@ -58,8 +79,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVect
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[1]);
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[0]);
 		}
-		
-
 		UE_LOG(LogTemp, Display, TEXT("assimp scene is valid %s"), *FilePath);
 		return true;
 	}
