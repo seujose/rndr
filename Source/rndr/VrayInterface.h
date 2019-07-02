@@ -56,7 +56,7 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, Category = "vray")
- 		bool CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals,TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName);
+ 		bool CreateGeomStaticMesh(bool box, TArray<FVector>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals,TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName);
 
 protected:
 	virtual void BeginPlay() override;

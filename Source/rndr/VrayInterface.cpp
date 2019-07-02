@@ -578,7 +578,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -586,6 +586,9 @@ bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertice
 	vector<Vector>normals;
 	vector<int>faceNormals;
 	Vector tempVector;
+	vector<Vector>uvws;
+	ValueList first_channel;
+	first_channel.push_back(Value(1));          // channel index
 	 
 	for (size_t i = 0; i < UnrealVertices.Num(); i++)
 	{
@@ -605,7 +608,19 @@ bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealVertice
 	{
 		faceNormals.push_back(UnrealFaceNormals[i]);
 	}
+	for (size_t i = 0; i < UnrealUVWs.Num(); i++)
+	{
+		tempVector.set(UnrealUVWs[i].X, UnrealUVWs[i].Y, UnrealUVWs[i].Z);
+		uvws.push_back(tempVector);
+	}
 
+	first_channel.push_back(Value(VectorList(uvws)));     // list of UVW coordinates
+	first_channel.push_back(Value(IntList(facess))); // list of indices from the UVW list
+
+	// map_channels describe the UVW coordinates used to map a texture to the geometry surface
+	ValueList map_channels;
+	map_channels.push_back(Value(first_channel));
+	mesh.set_map_channels(map_channels);
 	mesh.set_vertices(vertices);
 	mesh.set_faces(facess);
 	mesh.set_normals(normals);
