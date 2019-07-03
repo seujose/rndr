@@ -24,7 +24,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
+bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
 {
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
@@ -59,7 +59,7 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVe
 			theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
 			theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
 
-			theNormal.X = scene->mMeshes[0]->mNormals[i].x;
+			theNormal.X = scene->mMeshes[0]->mNormals[i].x; 
 			theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
 			theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
 
@@ -78,6 +78,22 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVe
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[2]);
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[1]);
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[0]);
+		}
+
+		for (size_t i = 0; i < scene->mNumMaterials; i++)
+		{
+			const aiMaterial*material = scene->mMaterials[i];
+			if (material->GetTextureCount(aiTextureType_DIFFUSE)>0)
+			{
+				aiString path;
+				if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL)==AI_SUCCESS)
+				{
+					//FString tempFString;
+					//string temp=path.data;
+					//tempFString = path.C_Str();
+					textPath.Add(path.C_Str());
+				}
+			}
 		}
 		UE_LOG(LogTemp, Display, TEXT("assimp scene is valid %s"), *FilePath);
 		return true;
