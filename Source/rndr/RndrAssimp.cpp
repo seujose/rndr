@@ -38,7 +38,7 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVe
 		
 	case 2:
 	{
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
 	}
 	break;
 

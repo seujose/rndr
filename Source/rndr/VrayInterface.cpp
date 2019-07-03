@@ -28,8 +28,10 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	settingsGI.set_primary_engine(2);
 	settingsGI.set_secondary_engine(3);
 	RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
+	
 	CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
 	cameraPhysical.set_exposure(true);
+
 
 	switch (renderMode)
 	{
