@@ -631,7 +631,7 @@ void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 	// Create a bitmap buffer which can load data from a file
 	BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
 	//bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));//verificar 
-	bitmapBuffer.set_file("C:/rndr/uvMap.jpg");
+	bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
 
 	TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
 	// Set the texture to use the loaded buffer
@@ -641,7 +641,9 @@ void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 	MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());//se cast falhar, corrigir
 
-	bRDFVRayMtl.set_opacity_color(texBitmap);
+	//bRDFVRayMtl.set_opacity_color(texBitmap);
+	bRDFVRayMtl.set_diffuse(texBitmap);
+
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
