@@ -1,6 +1,3 @@
-//#bakParaChaos mostrar pra chaos 
-//#criarNode, verificar proporção do mesh
-//#sincronizar selecao do menu com viewport
 #include "VrayInterface.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
@@ -72,10 +69,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	renderer.vfb.saveImage(pathToSave);
 }
 
-
-
 VRay::VRayInit init(true);
-//RendererOptions options;
 
 AVrayInterface::AVrayInterface()
 {
@@ -160,9 +154,9 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		LightRectangle lightRectangle = renderer.newPlugin<LightRectangle>();
 		lightRectangle.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
 			Vector(0.0, 1.0, 0.0),
-			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 200)));
+			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 100)));
 		lightRectangle.set_color(Color(1.0, 1.0, 1.0));
-		lightRectangle.set_intensity(100);
+		lightRectangle.set_intensity(30);
 		lightRectangle.set_u_size(128);
 		lightRectangle.set_v_size(128);
 		string temp = lightRectangle.getName();
@@ -617,10 +611,9 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FV
 		uvws.push_back(tempVector);
 	}
 
-	first_channel.push_back(Value(VectorList(uvws)));     // list of UVW coordinates
-	first_channel.push_back(Value(IntList(facess))); // list of indices from the UVW list
+	first_channel.push_back(Value(VectorList(uvws)));     
+	first_channel.push_back(Value(IntList(facess))); 
 
-	// map_channels describe the UVW coordinates used to map a texture to the geometry surface
 	ValueList map_channels;
 	map_channels.push_back(Value(first_channel));
 	mesh.set_map_channels(map_channels);
@@ -630,6 +623,25 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FV
 	mesh.set_faceNormals(faceNormals);
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
 	node.set_geometry(mesh);
+}
+
+void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
+{
+	//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=268
+	// Create a bitmap buffer which can load data from a file
+	BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+	//bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));//verificar 
+	bitmapBuffer.set_file("C:/rndr/uvMap.jpg");
+
+	TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+	// Set the texture to use the loaded buffer
+	texBitmap.set_bitmap(bitmapBuffer);
+
+	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
+	MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());//se cast falhar, corrigir
+
+	bRDFVRayMtl.set_opacity_color(texBitmap);
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
