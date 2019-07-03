@@ -17,7 +17,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	VRayRenderer::VFB& vfb = renderer.vfb;
 	vfb.enableProgressBar(true);
 	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-	vfb.setPositionAndSize(1080, 950, 640, 640);         // Position in screen-space and size in pixels
+	vfb.setPositionAndSize(-500, 700, 640, 640);         // Position in screen-space and size in pixels
 	vfb.enableInteractivity(true);
 	vfb.setAlwaysOnTop(true);
 	renderer.setImageSize(512, 512, true, true);
@@ -27,6 +27,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	settingsGI.set_on(true);
 	settingsGI.set_primary_engine(2);
 	settingsGI.set_secondary_engine(3);
+	RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
 	CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
 	cameraPhysical.set_exposure(true);
 
@@ -578,7 +579,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -610,7 +611,7 @@ bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealUVWs, T
 	}
 	for (size_t i = 0; i < UnrealUVWs.Num(); i++)
 	{
-		tempVector.set(UnrealUVWs[i].X, UnrealUVWs[i].Y, UnrealUVWs[i].Z);
+		tempVector.set(UnrealUVWs[i].X, UnrealUVWs[i].Y, (0,0, 0,0, 0,0));
 		uvws.push_back(tempVector);
 	}
 
@@ -627,7 +628,6 @@ bool AVrayInterface::CreateGeomStaticMesh(bool box, TArray<FVector>UnrealUVWs, T
 	mesh.set_faceNormals(faceNormals);
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*NodeName));
 	node.set_geometry(mesh);
-	return 0;
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)

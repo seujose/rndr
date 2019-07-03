@@ -24,7 +24,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
+bool ARndrAssimp::getMeshInfo(TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
 {
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
@@ -38,7 +38,7 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVect
 		
 	case 2:
 	{
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcessPreset_TargetRealtime_MaxQuality);
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
 	}
 	break;
 
@@ -53,8 +53,8 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVect
 	{
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
 		{
-			FVector theVertex, theNormal, theUV;
-			
+			FVector theVertex, theNormal;
+			FVector2D theUV;
 			theVertex.X = scene->mMeshes[0]->mVertices[i].x;
 			theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
 			theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
@@ -62,6 +62,7 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVect
 			theNormal.X = scene->mMeshes[0]->mNormals[i].x;
 			theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
 			theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
+
 			vertices.Push(theVertex);
 			normals.Push(theNormal);
 
@@ -69,7 +70,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&UV, FString FilePath, TArray<FVect
 			aiVector3D* textureVec = &theMesh->mTextureCoords[0][i];
 			theUV.X = textureVec->x;
 			theUV.Y = textureVec->y;
-			theUV.Z = (0.0, 0.0, 0.0);
 			UV.Add(theUV);
 		}
 		 
