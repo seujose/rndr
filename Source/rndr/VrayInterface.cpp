@@ -24,7 +24,6 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	settingsGI.set_on(true);
 	settingsGI.set_primary_engine(2);
 	settingsGI.set_secondary_engine(3);
-	RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
 	
 	CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
 	cameraPhysical.set_exposure(true);
@@ -80,7 +79,7 @@ AVrayInterface::AVrayInterface()
 void AVrayInterface::BeginPlay()
 {
 	Super::BeginPlay();
-
+	//RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
 }
 
 void AVrayInterface::Tick(float DeltaTime)
@@ -121,17 +120,17 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		break;
 	case EVrayPluginType::ERenderView:
 	{
-		//somente uma instancia
+		/*//somente uma instancia
 		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>("cameraPhysical");
 		cameraPhysical.set_exposure(true);
 		string temp = cameraPhysical.getName();
-		PluginNameOut = temp.c_str();
+		PluginNameOut = temp.c_str();*/
 
 		//somente uma instancia
 		RenderView renderView = renderer.getOrCreatePlugin<RenderView>("renderView");
-		renderView.set_transform(Transform(Matrix(Vector(0.92, 0.37, 0.0),
+		/*renderView.set_transform(Transform(Matrix(Vector(0, 0, 0.0),
 			Vector(0.12, -0.3, 0.94),
-			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
+			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));*/
 		renderView.set_fov(1.65806);
 	}
 		break;
