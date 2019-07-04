@@ -38,6 +38,7 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 		
 	case 2:
 	{
+		//scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
 		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
 	}
 	break;
@@ -63,6 +64,13 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 			theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
 			theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
 
+			if (importSwitch == 2)
+			{
+				theVertex.Y = scene->mMeshes[0]->mVertices[i].y*-1;
+				theNormal.X = scene->mMeshes[0]->mNormals[i].x*-1;
+				theNormal.Z = scene->mMeshes[0]->mNormals[i].z*-1;
+			}
+
 			vertices.Push(theVertex);
 			normals.Push(theNormal);
 
@@ -70,6 +78,10 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 			aiVector3D* textureVec = &theMesh->mTextureCoords[0][i];
 			theUV.X = textureVec->x;
 			theUV.Y = textureVec->y;
+			/*if (importSwitch==2)
+			{
+				theUV.X = theUV.X*-1;
+			}*/
 			UV.Add(theUV);
 		}
 		 
