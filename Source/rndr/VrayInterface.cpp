@@ -124,7 +124,8 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>(NULL);
 		//cameraPhysical.set_exposure(true);
 		cameraPhysical.set_specify_fov(true);
-		cameraPhysical.set_fov(45*3.14/180);
+		//cameraPhysical.set_fov(45*3.14/180);
+		cameraPhysical.set_fov(0.5);
 		string temp = cameraPhysical.getName();
 		PluginNameOut = temp.c_str();
 	}
