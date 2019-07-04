@@ -24,10 +24,6 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	settingsGI.set_on(true);
 	settingsGI.set_primary_engine(2);
 	settingsGI.set_secondary_engine(3);
-	
-	CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
-	cameraPhysical.set_exposure(true);
-
 
 	switch (renderMode)
 	{
@@ -118,17 +114,19 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		PluginNameOut = temp.c_str();
 	}
 		break;
-	case EVrayPluginType::ERenderView:
+	case EVrayPluginType::EPhysicalCamera:
 	{
-		//render view ja existe, sendo criado em begin play
-		//UE_LOG(LogTemp, Warning, TEXT("render view ja existe, sendo criado em begin play "));
-
-		/*//somente uma instancia
-		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>("cameraPhysical");
+		//somente uma instancia
+		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>(NULL);
 		cameraPhysical.set_exposure(true);
 		string temp = cameraPhysical.getName();
-		PluginNameOut = temp.c_str();*/
+		PluginNameOut = temp.c_str();
+	}
+	break;
 
+	case EVrayPluginType::ERenderView:
+	{
+		//somente uma instancia
 		RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
 		//renderView.set_transform(Transform(Matrix(Vector(0, 0, 0.0),Vector(0.12, -0.3, 0.94),Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
 		renderView.set_fov(1.65806);
