@@ -79,7 +79,7 @@ AVrayInterface::AVrayInterface()
 void AVrayInterface::BeginPlay()
 {
 	Super::BeginPlay();
-	//RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
+	
 }
 
 void AVrayInterface::Tick(float DeltaTime)
@@ -120,18 +120,20 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		break;
 	case EVrayPluginType::ERenderView:
 	{
+		//render view ja existe, sendo criado em begin play
+		//UE_LOG(LogTemp, Warning, TEXT("render view ja existe, sendo criado em begin play "));
+
 		/*//somente uma instancia
 		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>("cameraPhysical");
 		cameraPhysical.set_exposure(true);
 		string temp = cameraPhysical.getName();
 		PluginNameOut = temp.c_str();*/
 
-		//somente uma instancia
-		RenderView renderView = renderer.getOrCreatePlugin<RenderView>("renderView");
-		/*renderView.set_transform(Transform(Matrix(Vector(0, 0, 0.0),
-			Vector(0.12, -0.3, 0.94),
-			Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));*/
+		RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
+		//renderView.set_transform(Transform(Matrix(Vector(0, 0, 0.0),Vector(0.12, -0.3, 0.94),Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
 		renderView.set_fov(1.65806);
+		string temp = renderView.getName();
+		PluginNameOut = temp.c_str();
 	}
 		break;
 
