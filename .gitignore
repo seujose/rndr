@@ -38,6 +38,7 @@ Content/teapot.uasset
 Binaries/*
 Intermediate/*
 Saved/*
+Build/*
 DerivedDataCache/*
 enc_temp_folder/*
 Plugins/VictoryPlugin/Intermediate/*
