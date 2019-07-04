@@ -14,16 +14,21 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	VRayRenderer::VFB& vfb = renderer.vfb;
 	vfb.enableProgressBar(true);
 	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-	vfb.setPositionAndSize(-500, 700, 640, 640);         // Position in screen-space and size in pixels
+	vfb.setPositionAndSize(1074, 505, 640, 640);         // Position in screen-space and size in pixels
 	vfb.enableInteractivity(true);
 	vfb.setAlwaysOnTop(true);
 	renderer.setImageSize(512, 512, true, true);
+
 	SettingsRTEngine settingsRTEngine = renderer.getInstanceOrCreate<SettingsRTEngine>();
 	settingsRTEngine.set_undersampling(5);
+
 	SettingsGI settingsGI = renderer.getInstanceOrCreate<SettingsGI>();
 	settingsGI.set_on(true);
 	settingsGI.set_primary_engine(2);
 	settingsGI.set_secondary_engine(3);
+
+	renderer.setInteractiveNoiseThreshold(noise);
+	renderer.setInteractiveTimeout(timeToStop);
 
 	switch (renderMode)
 	{
@@ -56,8 +61,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	break;
 
 	}
-	renderer.setInteractiveTimeout(timeToStop);
-	renderer.setInteractiveNoiseThreshold(noise);
+	
 	renderer.setAutoCommit(true);
 	renderer.startSync();
 	renderer.setKeepInteractiveRunning(true);
@@ -118,7 +122,9 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 	{
 		//somente uma instancia
 		CameraPhysical cameraPhysical = renderer.getOrCreatePlugin<CameraPhysical>(NULL);
-		cameraPhysical.set_exposure(true);
+		//cameraPhysical.set_exposure(true);
+		cameraPhysical.set_specify_fov(true);
+		cameraPhysical.set_fov(45*3.14/180);
 		string temp = cameraPhysical.getName();
 		PluginNameOut = temp.c_str();
 	}
@@ -129,7 +135,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		//somente uma instancia
 		RenderView renderView = renderer.getInstanceOrCreate<RenderView>();
 		//renderView.set_transform(Transform(Matrix(Vector(0, 0, 0.0),Vector(0.12, -0.3, 0.94),Vector(0.35, -0.87, -0.32)), Vector(59.0, -140, 44)));
-		renderView.set_fov(1.65806);
+		
 		string temp = renderView.getName();
 		PluginNameOut = temp.c_str();
 	}
@@ -179,7 +185,7 @@ bool AVrayInterface::DeletePluginCpp(FString PluginName)
 	return false;
 }
 
-void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName)
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender)
 {
 	bool valueFound;
 	ParamSetSuccessfully = false;
@@ -353,8 +359,15 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		default:
 			break;
 		}
+		
+		if (resyncRender)
+		{
+			renderer.commit();
+			renderer.startSync();
+			RenderView renderView = renderer.getInstanceOf<RenderView>();
+			renderView.set_transform(renderView.get_transform());
+		}
 	}
-
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s not found"), *ParameterName);

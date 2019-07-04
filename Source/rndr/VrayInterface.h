@@ -49,7 +49,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName);
+		void SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,FString&ParameterValue);
 	UFUNCTION(BlueprintCallable, Category = "vray")
