@@ -95,11 +95,30 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 	case EVrayPluginType::ENode:
 	{
 		Node node = renderer.newPlugin<Node>();
-		MtlSingleBRDF nodeMat = renderer.newPlugin<MtlSingleBRDF>();
-		nodeMat.set_double_sided(false);
-		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
-		nodeMat.set_brdf(nodeMatBrdf);
-		node.set_material(nodeMat);
+		//MtlSingleBRDF nodeMat = renderer.newPlugin<MtlSingleBRDF>();
+		VRay::Plugins::Mtl2Sided twoSidedMat = renderer.newPlugin<Mtl2Sided>();
+		twoSidedMat.set_mult_by_front_diffuse(true);
+		twoSidedMat.set_force_1sided(true);
+		twoSidedMat.set_translucency_tex_mult(0);
+//		nodeMat.set_double_sided(false);
+		MtlSingleBRDF matFront = renderer.newPlugin<MtlSingleBRDF>();
+		MtlSingleBRDF matBack = renderer.newPlugin<MtlSingleBRDF>();
+		BRDFVRayMtl brdfFront = renderer.newPlugin<BRDFVRayMtl>();
+		BRDFVRayMtl brdfBack = renderer.newPlugin<BRDFVRayMtl>();
+		brdfFront.set_opacity_color(AColor(0, 1, 0, 1));
+		brdfBack.set_opacity_color(AColor(1, 0, 0, 1));
+		matFront.set_brdf(brdfFront);
+		matBack.set_brdf(brdfBack);
+		twoSidedMat.set_front(matFront);
+		twoSidedMat.set_back(matBack);
+		brdfFront.set_opacity(1);
+		brdfFront.set_opacity_mode(2);
+		brdfFront.set_diffuse(AColor(0, 1, 0, 1));
+		brdfBack.set_diffuse(AColor(1, 0, 0, 1));
+
+		
+		//nodeMat.set_brdf(nodeMatBrdf);
+		node.set_material(twoSidedMat);
 		node.set_transform(Transform(Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)), Vector(0, 0, 0)));
 		string temp = node.getName();
 		PluginNameOut = temp.c_str();
