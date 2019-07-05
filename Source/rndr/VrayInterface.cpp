@@ -8,7 +8,7 @@ using namespace VRay;
 using namespace VRay::Plugins;
 using namespace std;
 
-void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float noise, string pathToSave)
+void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float noise)
 {
 	renderer.stop();
 	VRayRenderer::VFB& vfb = renderer.vfb;
@@ -65,7 +65,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	renderer.setAutoCommit(true);
 	renderer.startSync();
 	renderer.setKeepInteractiveRunning(true);
-	renderer.vfb.saveImage(pathToSave);
+	
 }
 
 VRay::VRayInit init(true);
@@ -802,8 +802,19 @@ void AVrayInterface::bakeAnode(FString nodeName, int32 mode, int32 channelToUse)
 	string basePath = "C:/rndr/baked_";
 	string baseName = string(TCHAR_TO_UTF8(*nodeName));
 	string finalPath = basePath + baseName+".png";
-	fn_render(renderer, mode, 5000, 0.1, finalPath);
-	
+	fn_render(renderer, mode, 5000, 0.1);
+	renderer.waitForRenderEnd();
+	RenderElement rawLightRE = renderer.getRenderElements().get(RenderElement::RAWLIGHT);
+	if (rawLightRE)
+	{
+		Plugin rawLithPlugin = rawLightRE.getPlugin();
+		VRayImage *image = rawLightRE.getImage();
+		if (image)
+		{
+			image->saveToPng(finalPath);
+			delete image;
+		}
+	}
 }
 
 void AVrayInterface::LoadScene(FString path)
@@ -813,9 +824,7 @@ void AVrayInterface::LoadScene(FString path)
 
 void AVrayInterface::Render(int renderMode)
 {
-	string basePath = "C:/rndr/baked_";
-	string finalPath = basePath+ ".png";
-	fn_render(renderer, renderMode, 0, 0.1, finalPath);
+	fn_render(renderer, renderMode, 0, 0.1);
 }
 
 
