@@ -799,12 +799,12 @@ void AVrayInterface::bakeAnode(FString nodeName, int32 mode, int32 channelToUse)
 	theBaker.set_v_min(0);
 	theBaker.set_u_max(1);
 	theBaker.set_v_max(1);
+	RenderElement rawLightRE = renderer.getRenderElements().get(RenderElement::RAWLIGHT);
 	string basePath = "C:/rndr/baked_";
 	string baseName = string(TCHAR_TO_UTF8(*nodeName));
-	string finalPath = basePath + baseName+".png";
+	string finalPath = basePath + baseName+ "_"+rawLightRE.getName()+".png";
 	fn_render(renderer, mode, 5000, 0.1);
 	renderer.waitForRenderEnd();
-	RenderElement rawLightRE = renderer.getRenderElements().get(RenderElement::RAWLIGHT);
 	if (rawLightRE)
 	{
 		Plugin rawLithPlugin = rawLightRE.getPlugin();
