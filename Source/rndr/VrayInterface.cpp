@@ -609,7 +609,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel2, TArray<FVector2D>UVChannel1, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -618,8 +618,11 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FV
 	vector<int>faceNormals;
 	Vector tempVector;
 	vector<Vector>uvws;
+
 	ValueList first_channel;
-	first_channel.push_back(Value(1));          // channel index
+	ValueList second_Channel;
+	first_channel.push_back(Value(1));          
+	second_Channel.push_back(Value(2));
 	 
 	for (size_t i = 0; i < UnrealVertices.Num(); i++)
 	{
@@ -639,17 +642,34 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FV
 	{
 		faceNormals.push_back(UnrealFaceNormals[i]);
 	}
-	for (size_t i = 0; i < UnrealUVWs.Num(); i++)
-	{
-		tempVector.set(UnrealUVWs[i].X, UnrealUVWs[i].Y, (0,0, 0,0, 0,0));
-		uvws.push_back(tempVector);
-	}
-
-	first_channel.push_back(Value(VectorList(uvws)));     
-	first_channel.push_back(Value(IntList(facess))); 
 
 	ValueList map_channels;
+	for (size_t i = 0; i < UVChannel1.Num(); i++)
+	{
+		tempVector.set(UVChannel1[i].X, UVChannel1[i].Y, (0,0, 0,0, 0,0));
+		uvws.push_back(tempVector);
+	}
+	first_channel.push_back(Value(VectorList(uvws)));
+	first_channel.push_back(Value(IntList(facess)));
 	map_channels.push_back(Value(first_channel));
+
+	uvws.clear();
+	if (UVChannel2.Num()>0)
+	{
+		for (size_t i = 0; i < UVChannel2.Num(); i++)
+		{
+			tempVector.set(UVChannel2[i].X, UVChannel2[i].Y, (0, 0, 0, 0, 0, 0));
+			uvws.push_back(tempVector);
+		}
+		second_Channel.push_back(Value(VectorList(uvws)));
+		second_Channel.push_back(Value(IntList(facess)));
+		map_channels.push_back(Value(second_Channel));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("(%s) uv channel two invalid"), *NodeName);
+	}
+
 	mesh.set_map_channels(map_channels);
 	mesh.set_vertices(vertices);
 	mesh.set_faces(facess);

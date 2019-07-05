@@ -48,42 +48,42 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
 		{
 			FVector theVertex, theNormal;
-			FVector2D UVtemp;
 			theVertex.X = scene->mMeshes[0]->mVertices[i].x;
 			theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
 			theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
-
 			theNormal.X = scene->mMeshes[0]->mNormals[i].x; 
 			theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
 			theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
-
 			if (importSwitch == 2)
 			{
 				theVertex.Y = scene->mMeshes[0]->mVertices[i].y*-1;
 				theNormal.Y = scene->mMeshes[0]->mNormals[i].y*-1;
 			}
-
 			vertices.Push(theVertex);
 			normals.Push(theNormal);
-			
-			//UVs
-			//UV diffuse
+
+			FVector2D UVtemp;
 			aiMesh*theMesh = scene->mMeshes[0];
-			aiVector3D* textureVec = &theMesh->mTextureCoords[0][i];
-			UVtemp.X = textureVec->x;
-			UVtemp.Y = textureVec->y;
-			UV.Add(UVtemp);
-			//UV lightmap
-			if (&theMesh->mTextureCoords[1]!=NULL)
+			aiVector3D* textureVec=nullptr;
+
+
+			if (scene->mMeshes[0]->mTextureCoords[0])
+			{
+				textureVec = &theMesh->mTextureCoords[0][i];
+				UVtemp.X = textureVec->x;
+				UVtemp.Y = textureVec->y;
+				UV.Add(UVtemp);
+			}
+			
+			if (scene->mMeshes[0]->mTextureCoords[1])
 			{
 				textureVec = &theMesh->mTextureCoords[1][i];
 				UVtemp.X = textureVec->x;
 				UVtemp.Y = textureVec->y;
 				UVTwo.Add(UVtemp);
 			}
-			
 		}
-		 
+
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumFaces; i++)
 		{
 			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[2]);

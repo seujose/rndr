@@ -53,7 +53,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,FString&ParameterValue);
 	UFUNCTION(BlueprintCallable, Category = "vray")
- 		void CreateGeomStaticMesh(TArray<FVector2D>UnrealUVWs, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals,TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName);
+ 		void CreateGeomStaticMesh(TArray<FVector2D>UVChannel2, TArray<FVector2D>UVChannel1, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals,TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void ApplyBitmap(FString bitMapPath, FString nodeName);
 
