@@ -428,7 +428,8 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	case EVrayPluginType::EBRDF:
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
-		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		Mtl2Sided nodeMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
+		MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(nodeMat.get_front());
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
 		plugin = bRDFVRayMtl;
 	}
