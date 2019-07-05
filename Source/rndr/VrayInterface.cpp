@@ -96,6 +96,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 	{
 		Node node = renderer.newPlugin<Node>();
 		MtlSingleBRDF nodeMat = renderer.newPlugin<MtlSingleBRDF>();
+		nodeMat.set_double_sided(false);
 		BRDFVRayMtl nodeMatBrdf = renderer.newPlugin<BRDFVRayMtl>();
 		nodeMat.set_brdf(nodeMatBrdf);
 		node.set_material(nodeMat);
@@ -163,8 +164,8 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 100)));
 		lightRectangle.set_color(Color(1.0, 1.0, 1.0));
 		lightRectangle.set_intensity(30);
-		lightRectangle.set_u_size(128);
-		lightRectangle.set_v_size(128);
+		lightRectangle.set_u_size(64);
+		lightRectangle.set_v_size(64);
 		string temp = lightRectangle.getName();
 		PluginNameOut = temp.c_str();
 	}
@@ -741,7 +742,6 @@ void AVrayInterface::updateView(TArray<FVector>T)
 void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 {
 	RenderElements reManager = renderer.getRenderElements();
-	
 	if ((reManager.getAll(RenderElement::RAWLIGHT).size()) ==0)
 	{
 		reManager.add(RenderElement::RAWLIGHT, NULL, NULL);
