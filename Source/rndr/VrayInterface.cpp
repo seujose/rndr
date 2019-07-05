@@ -671,10 +671,9 @@ void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 	texBitmap.set_bitmap(bitmapBuffer);
 
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
-	MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
-	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());//se cast falhar, corrigir
-
-	//bRDFVRayMtl.set_opacity_color(texBitmap);
+	VRay::Plugins::Mtl2Sided twoSidedMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
+	MtlSingleBRDF frontMat = plugin_cast<MtlSingleBRDF>(twoSidedMat.get_front());
+	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(frontMat.get_brdf());//se cast falhar, corrigir
 	bRDFVRayMtl.set_diffuse(texBitmap);
 
 }
