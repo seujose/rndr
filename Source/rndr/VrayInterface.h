@@ -37,7 +37,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void updateView(TArray<FVector>T);
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void bakeAnode(FString nodeName, int32 mode);
+		void bakeAnode(FString nodeName, int32 mode, int32 channelToUse);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void LoadScene(FString path);
 	UFUNCTION(BlueprintCallable, Category = "vray")

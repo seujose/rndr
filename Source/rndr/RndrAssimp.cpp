@@ -24,7 +24,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch)
+bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
@@ -38,25 +38,17 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 		
 	case 2:
 	{
-		//scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
 	}
 	break;
-	
-	case 3:
-	{
-		//scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices );
-	}
-	break;
-
 	}
 	if (scene!=NULL)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("mesh (%s)-> uv count (%d) "),*FilePath , scene->mMeshes[0]->GetNumUVChannels());
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
 		{
 			FVector theVertex, theNormal;
-			FVector2D theUV;
+			FVector2D UVtemp;
 			theVertex.X = scene->mMeshes[0]->mVertices[i].x;
 			theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
 			theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
@@ -68,22 +60,28 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 			if (importSwitch == 2)
 			{
 				theVertex.Y = scene->mMeshes[0]->mVertices[i].y*-1;
-				theNormal.X = scene->mMeshes[0]->mNormals[i].x*-1;
-				theNormal.Z = scene->mMeshes[0]->mNormals[i].z*-1;
+				theNormal.Y = scene->mMeshes[0]->mNormals[i].y*-1;
 			}
 
 			vertices.Push(theVertex);
 			normals.Push(theNormal);
-
+			
+			//UVs
+			//UV diffuse
 			aiMesh*theMesh = scene->mMeshes[0];
 			aiVector3D* textureVec = &theMesh->mTextureCoords[0][i];
-			theUV.X = textureVec->x;
-			theUV.Y = textureVec->y;
-			/*if (importSwitch==2)
+			UVtemp.X = textureVec->x;
+			UVtemp.Y = textureVec->y;
+			UV.Add(UVtemp);
+			//UV lightmap
+			if (&theMesh->mTextureCoords[1]!=NULL)
 			{
-				theUV.X = theUV.X*-1;
-			}*/
-			UV.Add(theUV);
+				textureVec = &theMesh->mTextureCoords[1][i];
+				UVtemp.X = textureVec->x;
+				UVtemp.Y = textureVec->y;
+				UVTwo.Add(UVtemp);
+			}
+			
 		}
 		 
 		for (size_t i = 0; i < scene->mMeshes[0]->mNumFaces; i++)
@@ -101,9 +99,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FString>&textPath, TArray<FVector2D>&UV, FS
 				aiString path;
 				if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL)==AI_SUCCESS)
 				{
-					//FString tempFString;
-					//string temp=path.data;
-					//tempFString = path.C_Str();
 					textPath.Add(path.C_Str());
 				}
 			}

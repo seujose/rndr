@@ -758,7 +758,7 @@ void AVrayInterface::updateView(TArray<FVector>T)
 	renderView.set_transform(t);
 }
 
-void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
+void AVrayInterface::bakeAnode(FString nodeName, int32 mode, int32 channelToUse)
 {
 	RenderElements reManager = renderer.getRenderElements();
 	if ((reManager.getAll(RenderElement::RAWLIGHT).size()) ==0)
@@ -769,7 +769,7 @@ void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 	Node theTarget = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	theBaker.set_bake_node(theTarget);
 	UVWGenChannel theUVs = renderer.newPlugin<UVWGenChannel>();
-	theUVs.set_uvw_channel(2);
+	theUVs.set_uvw_channel(channelToUse);
 	theBaker.set_bake_uvwgen(theUVs);
 	ValueList theTargetNodeList;
 	theTargetNodeList.push_back((Value(theTarget)));
@@ -782,7 +782,7 @@ void AVrayInterface::bakeAnode(FString nodeName, int32 renderMode)
 	string basePath = "C:/rndr/baked_";
 	string baseName = string(TCHAR_TO_UTF8(*nodeName));
 	string finalPath = basePath + baseName+".png";
-	fn_render(renderer, renderMode, 5000, 0.1, finalPath);
+	fn_render(renderer, mode, 5000, 0.1, finalPath);
 	
 }
 
