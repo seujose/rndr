@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "RndrCharacter.h"
 #include "CollisionQueryParams.h"
-#include "EditableMesh/Public/EditableMesh.h"
+//#include "EditableMesh/Public/EditableMesh.h"
 
 ARndrCharacter::ARndrCharacter()
 {
