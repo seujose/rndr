@@ -44,3 +44,9 @@ enc_temp_folder/*
 Plugins/VictoryPlugin/Intermediate/*
 Plugins/VictoryPlugin/Binaries/*
 *.png
+
+testOnly/Binaries/*
+testOnly/Shipping/*
+testOnly/Saved/*
+testOnly/Intermediate/*
+testOnly/.vs/*

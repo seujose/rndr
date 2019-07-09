@@ -5,16 +5,14 @@
 //https://answers.unrealengine.com/questions/70019/how-to-include-the-header-file-from-a-plugin.html
 
 using UnrealBuildTool;
+using System.IO;
 
 public class rndr : ModuleRules
 {
 	public rndr(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		//PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EditableMesh" });
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
-
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EditableMesh" });
         PrivateDependencyModuleNames.AddRange(new string[] {});
         //PublicIncludePaths.AddRange(new string[] { "E:\\UnrealEngine\\Engine\\Plugins\\Runtime\\EditableMesh\\Source\\EditableMesh\\Public",  "C:\\rndr\\Source\\assimp", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });
         PublicIncludePaths.AddRange(new string[] { "C:\\rndr\\Source\\assimp", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });
