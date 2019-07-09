@@ -1,0 +1,14 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "4.22",
+	"Category": "",
+	"Description": "",
+	"Enterprise": false,
+	"Modules": [
+		{
+			"Name": "testOnly",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
