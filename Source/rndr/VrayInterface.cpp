@@ -168,7 +168,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		lightSphere.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
 			Vector(0.0, 1.0, 0.0),
 			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 200)));
-		lightSphere.set_color(Color(1.0, 1.0, 1.0));
+		//lightSphere.set_color(Color(1.0, 1.0, 1.0));
 		lightSphere.set_intensity(30);
 		lightSphere.set_radius(50);
 		string temp = lightSphere.getName();
@@ -181,7 +181,7 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 		lightRectangle.set_transform(Transform(Matrix(Vector(1.0, 0.0, 0.0),
 			Vector(0.0, 1.0, 0.0),
 			Vector(0.0, 0.0, 1.0)), Vector(0, 0, 100)));
-		lightRectangle.set_color(Color(1.0, 1.0, 1.0));
+		//lightRectangle.set_color(Color(1.0, 1.0, 1.0));
 		lightRectangle.set_intensity(30);
 		lightRectangle.set_u_size(64);
 		lightRectangle.set_v_size(64);
