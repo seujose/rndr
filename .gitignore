@@ -46,6 +46,7 @@ Plugins/VictoryPlugin/Binaries/*
 *.png
 
 testOnly/Binaries/*
+testOnly/Shipping/*
 testOnly/Saved/*
 testOnly/Intermediate/*
 testOnly/.vs/*
