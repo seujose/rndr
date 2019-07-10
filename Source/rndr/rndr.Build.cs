@@ -12,7 +12,7 @@ public class rndr : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EditableMesh" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EditableMesh", "Slate", "SlateCore", "UMG" });
         
         PrivateDependencyModuleNames.AddRange(new string[] {});
         PublicIncludePaths.AddRange(new string[] { "E:\\UnrealEngine\\Engine\\Plugins\\Runtime\\EditableMesh\\Source\\EditableMesh\\Public",  "C:\\rndr\\Source\\assimp", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });

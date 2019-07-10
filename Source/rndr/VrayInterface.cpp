@@ -1,4 +1,5 @@
 #include "VrayInterface.h"
+#include "RndrAssimp.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
 #include <vector>
@@ -88,37 +89,42 @@ void AVrayInterface::Tick(float DeltaTime)
 
 }
 
-void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType)
+void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType PluginType, bool twoSidedMat)
 {
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
 	{
 		Node node = renderer.newPlugin<Node>();
-		//MtlSingleBRDF nodeMat = renderer.newPlugin<MtlSingleBRDF>();
-		VRay::Plugins::Mtl2Sided twoSidedMat = renderer.newPlugin<Mtl2Sided>();
-		twoSidedMat.set_mult_by_front_diffuse(true);
-		twoSidedMat.set_force_1sided(true);
-		twoSidedMat.set_translucency_tex_mult(0);
-//		nodeMat.set_double_sided(false);
-		MtlSingleBRDF matFront = renderer.newPlugin<MtlSingleBRDF>();
-		MtlSingleBRDF matBack = renderer.newPlugin<MtlSingleBRDF>();
-		BRDFVRayMtl brdfFront = renderer.newPlugin<BRDFVRayMtl>();
-		BRDFVRayMtl brdfBack = renderer.newPlugin<BRDFVRayMtl>();
-		brdfFront.set_opacity_color(AColor(0, 1, 0, 1));
-		brdfBack.set_opacity_color(AColor(1, 0, 0, 1));
-		matFront.set_brdf(brdfFront);
-		matBack.set_brdf(brdfBack);
-		twoSidedMat.set_front(matFront);
-		twoSidedMat.set_back(matBack);
-		brdfFront.set_opacity(1);
-		brdfFront.set_opacity_mode(2);
-		brdfFront.set_diffuse(AColor(0, 1, 0, 1));
-		brdfBack.set_diffuse(AColor(1, 0, 0, 1));
-
-		
-		//nodeMat.set_brdf(nodeMatBrdf);
-		node.set_material(twoSidedMat);
+		if (twoSidedMat)
+		{
+			VRay::Plugins::Mtl2Sided twoSidedMat = renderer.newPlugin<Mtl2Sided>();
+			twoSidedMat.set_mult_by_front_diffuse(true);
+			twoSidedMat.set_force_1sided(true);
+			twoSidedMat.set_translucency_tex_mult(0);
+			MtlSingleBRDF matFront = renderer.newPlugin<MtlSingleBRDF>();
+			MtlSingleBRDF matBack = renderer.newPlugin<MtlSingleBRDF>();
+			BRDFVRayMtl brdfFront = renderer.newPlugin<BRDFVRayMtl>();
+			BRDFVRayMtl brdfBack = renderer.newPlugin<BRDFVRayMtl>();
+			brdfFront.set_opacity_color(AColor(0, 1, 0, 1));
+			brdfBack.set_opacity_color(AColor(1, 0, 0, 1));
+			matFront.set_brdf(brdfFront);
+			matBack.set_brdf(brdfBack);
+			twoSidedMat.set_front(matFront);
+			twoSidedMat.set_back(matBack);
+			brdfFront.set_opacity(1);
+			brdfFront.set_opacity_mode(2);
+			brdfFront.set_diffuse(AColor(0, 1, 0, 1));
+			brdfBack.set_diffuse(AColor(1, 0, 0, 1));
+			node.set_material(twoSidedMat);
+		}
+		else
+		{
+			MtlSingleBRDF singleMat = renderer.newPlugin<MtlSingleBRDF>();
+			BRDFVRayMtl brdf = renderer.newPlugin<BRDFVRayMtl>();
+			singleMat.set_brdf(brdf);
+			node.set_material(singleMat);
+		}
 		node.set_transform(Transform(Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)), Vector(0, 0, 0)));
 		string temp = node.getName();
 		PluginNameOut = temp.c_str();
@@ -206,7 +212,9 @@ bool AVrayInterface::DeletePluginCpp(FString PluginName)
 	return false;
 }
 
-void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender)
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType,
+	TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, 
+	TArray<float>floatArrayIn, FString ParameterName, bool resyncRender)
 {
 	bool valueFound;
 	ParamSetSuccessfully = false;
@@ -290,8 +298,8 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		{
 			Color color; 
 			color.r = colorIn.R;
-			color.g = colorIn.R;
-			color.b = colorIn.G;
+			color.g = colorIn.G;
+			color.b = colorIn.B;
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), color));
 		}
 		break;
@@ -299,9 +307,9 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		{
 			AColor aColor;
 			aColor.color.r = colorIn.R;
-			aColor.color.g = colorIn.R;
-			aColor.color.b = colorIn.G;
-			aColor.alpha = 1.0;
+			aColor.color.g = colorIn.G;
+			aColor.color.b = colorIn.B;
+			aColor.alpha = colorIn.A;
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
 		}
 		break;
@@ -428,8 +436,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	case EVrayPluginType::EBRDF:
 	{
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
-		Mtl2Sided nodeMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
-		MtlSingleBRDF mtlSingleBRDF = plugin_cast<MtlSingleBRDF>(nodeMat.get_front());
+		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
 		plugin = bRDFVRayMtl;
 	}
@@ -609,7 +616,7 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	}
 }
 
-void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel2, TArray<FVector2D>UVChannel1, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
+void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel1, TArray<FVector2D>UVChannel2, TArray<FVector>UnrealVertices, TArray<FVector>UnrealNormals, TArray<int32>UnrealFaces, TArray<int32>UnrealFaceNormals, FString NodeName)
 {
 	GeomStaticMesh mesh = renderer.newPlugin<GeomStaticMesh>();
 	vector<Vector>vertices;
@@ -679,7 +686,8 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel2, TArray<FV
 	node.set_geometry(mesh);
 }
 
-void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
+/*
+bool AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 {
 	//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=268
 	// Create a bitmap buffer which can load data from a file
@@ -692,11 +700,30 @@ void AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 	texBitmap.set_bitmap(bitmapBuffer);
 
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
-	VRay::Plugins::Mtl2Sided twoSidedMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
-	MtlSingleBRDF frontMat = plugin_cast<MtlSingleBRDF>(twoSidedMat.get_front());
-	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(frontMat.get_brdf());//se cast falhar, corrigir
-	bRDFVRayMtl.set_diffuse(texBitmap);
+	//VRay::Plugins::Mtl2Sided twoSidedMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
+	MtlSingleBRDF mat = plugin_cast<MtlSingleBRDF>(node.get_material());
+	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mat.get_brdf());//se cast falhar, corrigir
+	return (bRDFVRayMtl.set_diffuse(texBitmap));
 
+}*/
+
+void AVrayInterface::editMaterial(FString bitMapPath, FString nodeName, FLinearColor color)
+{
+	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
+	MtlSingleBRDF mat = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+	BRDFVRayMtl brdf = plugin_cast<BRDFVRayMtl>(mat.get_brdf());
+	if (bitMapPath.IsEmpty())
+	{
+		brdf.set_diffuse(AColor(color.R, color.G, color.B, color.A));
+	}
+	else
+	{
+		BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+		bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
+		TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+		texBitmap.set_bitmap(bitmapBuffer);
+		brdf.set_diffuse(texBitmap);
+	}
 }
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
@@ -710,8 +737,6 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 		tempString = plugin.getName();
 		PluginName.Push(tempString.c_str());
 	}
-
-
 }
 
 void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
