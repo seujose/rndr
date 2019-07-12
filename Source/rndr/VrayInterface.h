@@ -21,6 +21,7 @@ enum class EVrayPluginType : uint8
 	ELightSphere UMETA(DisplayName = "LightSphere"),
 	ERenderView UMETA(DisplayName = "RenderView"),
 	EPhysicalCamera UMETA(DisplayName = "PhysicalCamera"),
+	ETexBitmap UMETA(DisplayName = "TexBitmap"),
 	EGenericPlugin UMETA(DisplayName = "GenericPlugin")
 };
 

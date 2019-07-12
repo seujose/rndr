@@ -407,7 +407,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut,
 	TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&tOut, FString nameIn, 
 	FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, 
-	FString ParameterName, FString&ParameterValue)
+	FString ParameterName, FString&ParameterValueAsString)
 {
 	//se ParameterName vazio, retorna os parametros do plugin ignorando plugin type
 	vector<string>propertyNames;
@@ -415,9 +415,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	FString tempFString;
 	floatArrayOut.Init(0.0, 4);
 	Plugin plugin;
-	
-
-
 	switch (PluginType)
 	{
 	case EVrayPluginType::ENode:
@@ -462,6 +459,16 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 	{
 		LightRectangle lightRectangle = renderer.getPlugin<LightRectangle>(TCHAR_TO_UTF8(*nameIn));
 		plugin = lightRectangle;
+	}
+	break;
+	case  EVrayPluginType::ETexBitmap:
+	{
+		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
+		MtlSingleBRDF mat = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
+		BRDFVRayMtl brdf = plugin_cast<BRDFVRayMtl>(mat.get_brdf());
+		TexBitmap texBitmap = plugin_cast<TexBitmap>(brdf.get_diffuse().as<Plugin>());
+		BitmapBuffer bitmapBuffer = plugin_cast<BitmapBuffer>(texBitmap.get_bitmap());
+		plugin = bitmapBuffer;
 	}
 	break;
 	case EVrayPluginType::EGenericPlugin:
@@ -529,15 +536,18 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 			}
 			break;
 			case VRay::TYPE_STRING:
-				break;
-			case VRay::TYPE_PLUGIN:
 			{
 				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getStringType();
 				ParamTypeOut.Push(tempString.c_str());
 
+				ParameterValueAsString = plugin.getValueAsString(TCHAR_TO_UTF8(*ParameterName)).c_str();
+			}
+				break;
+			case VRay::TYPE_PLUGIN:
+			{
 
-				//tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName), paramFound).getPlugin().getName();
-				//ParamTypeOut.Push(tempString.c_str());
+				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getStringType();
+				ParamTypeOut.Push(tempString.c_str());
 			}
 				break;
 			case VRay::TYPE_TEXTURE:
