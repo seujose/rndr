@@ -70,9 +70,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourO
 	case 2:
 	{
 		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-		
-		
-		
 	}
 	break;
 	}

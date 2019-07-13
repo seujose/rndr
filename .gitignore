@@ -31,6 +31,10 @@
 *.out
 *.app
 
+*.jpeg
+*.jpg
+*.png
+
 .vs/*
 Content/box.uasset
 Content/plane.uasset
