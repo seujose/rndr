@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+//Copyright 2019 Jose Jacques. All Rights Reserved.
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "explorer.generated.h"
@@ -12,17 +10,14 @@ class RNDR_API Aexplorer : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	Aexplorer();
-	UFUNCTION(BlueprintCallable, Category = "rndr")
-		void openFile();
-
+	UFUNCTION(BlueprintCallable, Category = "FilePicker")
+		void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
+	UFUNCTION(BlueprintCallable, Category = "FilePicker")
+		void PrintData(const FString& File);
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 };
