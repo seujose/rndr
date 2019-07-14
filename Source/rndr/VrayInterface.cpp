@@ -212,9 +212,10 @@ bool AVrayInterface::DeletePluginCpp(FString PluginName)
 	return false;
 }
 
-void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType,
-	TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, 
-	TArray<float>floatArrayIn, FString ParameterName, bool resyncRender)
+
+
+
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, TArray <FString> GeneralString, bool boolin)
 {
 	bool valueFound;
 	ParamSetSuccessfully = false;
@@ -291,6 +292,9 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		case VRay::TYPE_DOUBLE:
 			break;
 		case VRay::TYPE_BOOL:
+		{
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), boolin));
+		}
 			break;
 		case VRay::TYPE_VECTOR:
 			break;
@@ -405,6 +409,8 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	}
 
 }
+
+
 
 void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut,
 	TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&tOut, FString nameIn, 
@@ -547,9 +553,12 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				break;
 			case VRay::TYPE_PLUGIN:
 			{
-
 				tempString = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getStringType();
 				ParamTypeOut.Push(tempString.c_str());
+
+				Plugin childPlugin = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).as<Plugin>();
+				tempString = childPlugin.getName();
+				ParameterValueAsString = tempString.c_str();
 			}
 				break;
 			case VRay::TYPE_TEXTURE:
@@ -748,6 +757,10 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 		PluginName.Push(tempString.c_str());
 	}
 }
+
+
+ 
+
 
 void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
 	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, TArray<int32>&mapChannelfacesOut)
