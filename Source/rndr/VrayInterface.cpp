@@ -217,6 +217,7 @@ bool AVrayInterface::DeletePluginCpp(FString PluginName)
 
 void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, TArray <FString> GeneralString, bool boolin)
 {
+	resyncRender = false;
 	bool valueFound;
 	ParamSetSuccessfully = false;
 	Plugin plugin;
@@ -260,6 +261,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	{
 		CameraPhysical cameraPhysical = renderer.getInstanceOrCreate<CameraPhysical>();
 		plugin = cameraPhysical;
+		resyncRender = true;
 	}
 	break;
 
