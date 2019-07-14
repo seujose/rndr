@@ -22,6 +22,10 @@
 		{
 			"Name": "MeshEditor",
 			"Enabled": true
+		},
+		{
+			"Name": "VictoryUMG",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

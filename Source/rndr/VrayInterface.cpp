@@ -15,7 +15,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	VRayRenderer::VFB& vfb = renderer.vfb;
 	vfb.enableProgressBar(true);
 	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-	vfb.setPositionAndSize(1074, 505, 640, 640);         // Position in screen-space and size in pixels
+	vfb.setPositionAndSize(1080, 700, 640, 640);         // Position in screen-space and size in pixels
 	vfb.enableInteractivity(true);
 	vfb.setAlwaysOnTop(true);
 	renderer.setImageSize(512, 512, true, true);
@@ -612,8 +612,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 		}
 		else
 		{
-
-
 		PluginMeta pluginMeta = renderer.getPluginMeta(plugin.getType());
 		propertyNames = pluginMeta.getPropertyNames();
 		for (size_t i = 0; i < propertyNames.size(); i++)
