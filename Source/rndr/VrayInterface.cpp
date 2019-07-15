@@ -247,7 +247,12 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
-		plugin = bRDFVRayMtl;
+
+		if (ParameterName=="diffuse")
+		{
+			AVrayInterface::editMaterial(GeneralString[0], nameIn, colorIn);
+		}
+		return;
 	}
 		break;
 	case EVrayPluginType::ERenderView:
@@ -338,6 +343,8 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		case VRay::TYPE_STRING:
 			break;
 		case VRay::TYPE_PLUGIN:
+		{
+		}
 			break;
 		case VRay::TYPE_TEXTURE:
 			break;
@@ -730,15 +737,36 @@ bool AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
 
 void AVrayInterface::editMaterial(FString bitMapPath, FString nodeName, FLinearColor color)
 {
+	//para alternar entre cor e textura, limpar bitmap
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	MtlSingleBRDF mat = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 	BRDFVRayMtl brdf = plugin_cast<BRDFVRayMtl>(mat.get_brdf());
-	if (bitMapPath.IsEmpty())
+//#nullPath tá feio, arrumar isso
+	if (bitMapPath=="nullPath")//se cancelou o carregamento da textura 
 	{
-		brdf.set_diffuse(AColor(color.R, color.G, color.B, color.A));
+		if (brdf.get_diffuse().getType()==TYPE_PLUGIN)//se diffuse está sendo usado como textura
+		{
+			TexBitmap texBitmap = plugin_cast<TexBitmap>(brdf.get_diffuse().as<Plugin>());
+			BitmapBuffer bitmapBuffer = plugin_cast<BitmapBuffer>(texBitmap.get_bitmap());
+			bitmapBuffer.set_file(NULL);//limpa o slot
+		}
+		brdf.set_diffuse(AColor(color.R, color.G, color.B, color.A)); //define a cor
+		return;
 	}
-	else
+	else//caminho do bitmap é validoç
 	{
+		if (brdf.get_diffuse().getType()==TYPE_PLUGIN)
+		{
+			TexBitmap texBitmap = plugin_cast<TexBitmap>(brdf.get_diffuse().as<Plugin>());
+			BitmapBuffer bitmapBuffer = plugin_cast<BitmapBuffer>(texBitmap.get_bitmap());
+			if (texBitmap.isNotEmpty() && bitmapBuffer.isNotEmpty())//se ja existem os plugins de textura
+			{
+				bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
+				texBitmap.set_bitmap(bitmapBuffer);
+			}
+			brdf.set_diffuse(texBitmap);
+			return;
+		}
 		BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
 		bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
 		TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
@@ -746,6 +774,7 @@ void AVrayInterface::editMaterial(FString bitMapPath, FString nodeName, FLinearC
 		brdf.set_diffuse(texBitmap);
 	}
 }
+
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
 {
@@ -759,10 +788,6 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 		PluginName.Push(tempString.c_str());
 	}
 }
-
-
- 
-
 
 void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
 	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, TArray<int32>&mapChannelfacesOut)
