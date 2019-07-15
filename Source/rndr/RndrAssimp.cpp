@@ -81,79 +81,79 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourO
 	if (scene!=NULL)
 	{//#otimizar com auto
 		//UE_LOG(LogTemp, Warning, TEXT("mesh (%s)-> uv count (%d) "),*FilePath , scene->mMeshes[0]->GetNumUVChannels());
-		for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
+		if (scene->mMeshes[0]->mNumVertices>0)//previne crash lendo fbx de uma luz por exemplo
 		{
-			FVector theVertex, theNormal;
-			theVertex.X = scene->mMeshes[0]->mVertices[i].x;
-			theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
-			theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
-			theNormal.X = scene->mMeshes[0]->mNormals[i].x; 
-			theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
-			theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
-			if (importSwitch == 2)
+			for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
 			{
-				theVertex.Y = scene->mMeshes[0]->mVertices[i].y*-1;
-				theNormal.Y = scene->mMeshes[0]->mNormals[i].y*-1;
-			}
-			vertices.Push(theVertex);
-			normals.Push(theNormal);
-
-			FVector2D UVtemp;
-			aiMesh*theMesh = scene->mMeshes[0];
-			aiVector3D* textureVec=nullptr;
-
-
-			if (scene->mMeshes[0]->mTextureCoords[0])
-			{
-				textureVec = &theMesh->mTextureCoords[0][i];
-				UVtemp.X = textureVec->x;
-				UVtemp.Y = textureVec->y;
-				UV.Add(UVtemp);
-			}
-			
-			if (scene->mMeshes[0]->mTextureCoords[1])
-			{
-				textureVec = &theMesh->mTextureCoords[1][i];
-				UVtemp.X = textureVec->x;
-				UVtemp.Y = textureVec->y;
-				UVTwo.Add(UVtemp);
-			}
-		}
-
-		for (size_t i = 0; i < scene->mMeshes[0]->mNumFaces; i++)
-		{
-			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[2]);
-			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[1]);
-			faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[0]);
-		}
-		for (size_t i = 0; i < scene->mNumMaterials; i++)
-		{
-			const aiMaterial*material = scene->mMaterials[i];
-			if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-			{
-				aiString path;
-				if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+				FVector theVertex, theNormal;
+				theVertex.X = scene->mMeshes[0]->mVertices[i].x;
+				theVertex.Y = scene->mMeshes[0]->mVertices[i].y;
+				theVertex.Z = scene->mMeshes[0]->mVertices[i].z;
+				theNormal.X = scene->mMeshes[0]->mNormals[i].x;
+				theNormal.Y = scene->mMeshes[0]->mNormals[i].y;
+				theNormal.Z = scene->mMeshes[0]->mNormals[i].z;
+				if (importSwitch == 2)
 				{
-					textPath.Add(path.C_Str());
+					theVertex.Y = scene->mMeshes[0]->mVertices[i].y*-1;
+					theNormal.Y = scene->mMeshes[0]->mNormals[i].y*-1;
+				}
+				vertices.Push(theVertex);
+				normals.Push(theNormal);
+
+				FVector2D UVtemp;
+				aiMesh*theMesh = scene->mMeshes[0];
+				aiVector3D* textureVec = nullptr;
+
+
+				if (scene->mMeshes[0]->mTextureCoords[0])
+				{
+					textureVec = &theMesh->mTextureCoords[0][i];
+					UVtemp.X = textureVec->x;
+					UVtemp.Y = textureVec->y;
+					UV.Add(UVtemp);
+				}
+
+				if (scene->mMeshes[0]->mTextureCoords[1])
+				{
+					textureVec = &theMesh->mTextureCoords[1][i];
+					UVtemp.X = textureVec->x;
+					UVtemp.Y = textureVec->y;
+					UVTwo.Add(UVtemp);
 				}
 			}
-			else
+			for (size_t i = 0; i < scene->mMeshes[0]->mNumFaces; i++)
 			{
-				aiColor4D assimpColor;
-				if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &assimpColor))
+				faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[2]);
+				faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[1]);
+				faces.Push(scene->mMeshes[0]->mFaces[i].mIndices[0]);
+			}
+			for (size_t i = 0; i < scene->mNumMaterials; i++)
+			{
+				const aiMaterial*material = scene->mMaterials[i];
+				if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 				{
-					colourOut.R = assimpColor.r;
-					colourOut.G = assimpColor.g;
-					colourOut.B = assimpColor.b;
-					colourOut.A = assimpColor.a;
+					aiString path;
+					if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+					{
+						textPath.Add(path.C_Str());
+					}
+				}
+				else
+				{
+					aiColor4D assimpColor;
+					if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &assimpColor))
+					{
+						colourOut.R = assimpColor.r;
+						colourOut.G = assimpColor.g;
+						colourOut.B = assimpColor.b;
+						colourOut.A = assimpColor.a;
+					}
 				}
 			}
 		}
-		
-		//UE_LOG(LogTemp, Display, TEXT("assimp scene is valid %s"), *FilePath);
+
 		return true;
 	}
-	//UE_LOG(LogTemp, Error, TEXT("assimp scene is invalid %s"), *FilePath);
 	return false;
 }
 
