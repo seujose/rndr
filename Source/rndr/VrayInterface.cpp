@@ -123,6 +123,10 @@ void AVrayInterface::CreatePluginCpp(FString&PluginNameOut, EVrayPluginType Plug
 			MtlSingleBRDF singleMat = renderer.newPlugin<MtlSingleBRDF>();
 			BRDFVRayMtl brdf = renderer.newPlugin<BRDFVRayMtl>();
 			singleMat.set_brdf(brdf);
+			BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+			TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+			texBitmap.set_bitmap(bitmapBuffer);
+			brdf.set_diffuse(texBitmap);
 			node.set_material(singleMat);
 		}
 		node.set_transform(Transform(Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)), Vector(0, 0, 0)));
@@ -308,12 +312,23 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 		case VRay::TYPE_ACOLOR:
 		{
-			AColor aColor;
-			aColor.color.r = colorIn.R;
-			aColor.color.g = colorIn.G;
-			aColor.color.b = colorIn.B;
-			aColor.alpha = colorIn.A;
-			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
+			if (stringIn.IsEmpty())
+			{
+				AColor aColor;
+				aColor.color.r = colorIn.R;
+				aColor.color.g = colorIn.G;
+				aColor.color.b = colorIn.B;
+				aColor.alpha = colorIn.A;
+				ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
+			}
+			else
+			{
+				BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+				bitmapBuffer.set_file(TCHAR_TO_UTF8(*stringIn));
+				TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+				texBitmap.set_bitmap(bitmapBuffer);
+				ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), texBitmap));
+			}
 		}
 		break;
 		case VRay::TYPE_TRANSFORM:
@@ -332,7 +347,23 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 		case VRay::TYPE_PLUGIN:
 		{
-			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), TCHAR_TO_UTF8(*stringIn)));
+			if (!stringIn.IsEmpty())
+			{
+				BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+				bitmapBuffer.set_file(TCHAR_TO_UTF8(*stringIn));
+				TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+				texBitmap.set_bitmap(bitmapBuffer);
+				ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), texBitmap));
+			}
+			else
+			{
+				AColor aColor;
+				aColor.color.r = colorIn.R;
+				aColor.color.g = colorIn.G;
+				aColor.color.b = colorIn.B;
+				aColor.alpha = colorIn.A;
+				ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
+			}
 		}
 		break;
 		}
