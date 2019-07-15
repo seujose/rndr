@@ -56,7 +56,7 @@ public:
 		void SetVrayPluginParameter( bool&ParamSetSuccessfully, EVrayPluginType PluginType,
 	TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, 
 	TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, 
-	TArray <FString> GeneralString, bool boolin);
+	FString  stringIn, bool boolin);
 
 
 	UFUNCTION(BlueprintCallable, Category = "vray")

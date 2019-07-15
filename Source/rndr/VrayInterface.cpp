@@ -212,10 +212,7 @@ bool AVrayInterface::DeletePluginCpp(FString PluginName)
 	return false;
 }
 
-
-
-
-void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, TArray <FString> GeneralString, bool boolin)
+void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPluginType PluginType, TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, FString stringIn, bool boolin)
 {
 	resyncRender = false;
 	bool valueFound;
@@ -247,12 +244,12 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nameIn));
 		MtlSingleBRDF mtlSingleBRDF = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 		BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mtlSingleBRDF.get_brdf());
-
-		if (ParameterName=="diffuse")
+		plugin = bRDFVRayMtl;
+		/*if (ParameterName=="diffuse")
 		{
-			AVrayInterface::editMaterial(GeneralString[0], nameIn, colorIn);
+			AVrayInterface::editMaterial(stringIn, nameIn, colorIn);
 		}
-		return;
+		return;*/
 	}
 		break;
 	case EVrayPluginType::ERenderView:
@@ -292,18 +289,13 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 		break;
 		case VRay::TYPE_FLOAT:
 		{
-			 
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), floatArrayIn[0]));
 		}
 		break;
-		case VRay::TYPE_DOUBLE:
-			break;
 		case VRay::TYPE_BOOL:
 		{
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), boolin));
 		}
-			break;
-		case VRay::TYPE_VECTOR:
 			break;
 		case VRay::TYPE_COLOR:
 		{
@@ -324,8 +316,6 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), aColor));
 		}
 		break;
-		case VRay::TYPE_MATRIX:
-			break;
 		case VRay::TYPE_TRANSFORM:
 		{
 			VRay::Transform t;
@@ -340,70 +330,13 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 			}
 		}
 		break;
-		case VRay::TYPE_STRING:
-			break;
 		case VRay::TYPE_PLUGIN:
 		{
+			ParamSetSuccessfully = (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), TCHAR_TO_UTF8(*stringIn)));
 		}
-			break;
-		case VRay::TYPE_TEXTURE:
-			break;
-		case VRay::TYPE_LIST:
-			break;
-		case VRay::TYPE_TEXTUREFLOAT:
-			break;
-		case VRay::TYPE_TEXTUREINT:
-			break;
-		case VRay::TYPE_TEXTUREVECTOR:
-			break;
-		case VRay::TYPE_TEXTUREMATRIX:
-			break;
-		case VRay::TYPE_TEXTURETRANSFORM:
-			break;
-			//case VRay::TYPE_GENERAL_LIST:
-				//break;
-		case VRay::TYPE_INT_LIST:
-			break;
-		case VRay::TYPE_FLOAT_LIST:
-			break;
-		case VRay::TYPE_BOOL_LIST:
-			break;
-		case VRay::TYPE_VECTOR_LIST:
-			break;
-		case VRay::TYPE_COLOR_LIST:
-			break;
-		case VRay::TYPE_STRING_LIST:
-			break;
-		case VRay::TYPE_PLUGIN_LIST:
-			break;
-		case VRay::TYPE_TEXTURE_LIST:
-			break;
-		case VRay::TYPE_TEXTUREFLOAT_LIST:
-			break;
-		case VRay::TYPE_TEXTUREMATRIX_LIST:
-			break;
-		case VRay::TYPE_TEXTURETRANSFORM_LIST:
-			break;
-		case VRay::TYPE_OUTPUTTEXTURE:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREFLOAT:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREINT:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREVECTOR:
-			break;
-		case VRay::TYPE_OUTPUTTEXTUREMATRIX:
-			break;
-		case VRay::TYPE_OUTPUTTEXTURETRANSFORM:
-			break;
-		case VRay::TYPE_UNSPECIFIED:
-			break;
-		case VRay::TYPE_ERROR:
-			break;
-		default:
-			break;
+		break;
 		}
-		
+
 		if (resyncRender)
 		{
 			renderer.commit();
@@ -416,10 +349,7 @@ void AVrayInterface::SetVrayPluginParameter(bool&ParamSetSuccessfully, EVrayPlug
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s not found"), *ParameterName);
 	}
-
 }
-
-
 
 void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut,
 	TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&tOut, FString nameIn, 
@@ -511,12 +441,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				floatArrayOut[0] = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getFloat();
 			}
 			break;
-			case VRay::TYPE_DOUBLE:
-				break;
-			case VRay::TYPE_BOOL:
-				break;
-			case VRay::TYPE_VECTOR:
-				break;
 			case VRay::TYPE_COLOR:
 			{
 				Color color = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getColor();
@@ -537,8 +461,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				ParamTypeOut.Push(tempString.c_str());
 			}
 			break;
-			case VRay::TYPE_MATRIX:
-				break;
 			case VRay::TYPE_TRANSFORM://#otimizar
 			{
 				VRay::Transform t = plugin.getValue(TCHAR_TO_UTF8(*ParameterName)).getTransform();
@@ -569,62 +491,6 @@ void AVrayInterface::GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TA
 				tempString = childPlugin.getName();
 				ParameterValueAsString = tempString.c_str();
 			}
-				break;
-			case VRay::TYPE_TEXTURE:
-				break;
-			case VRay::TYPE_LIST:
-				break;
-			case VRay::TYPE_TEXTUREFLOAT:
-				break;
-			case VRay::TYPE_TEXTUREINT:
-				break;
-			case VRay::TYPE_TEXTUREVECTOR:
-				break;
-			case VRay::TYPE_TEXTUREMATRIX:
-				break;
-			case VRay::TYPE_TEXTURETRANSFORM:;
-				break;
-				//case VRay::TYPE_GENERAL_LIST:
-					//break;
-			case VRay::TYPE_INT_LIST:
-				break;
-			case VRay::TYPE_FLOAT_LIST:
-				break;
-			case VRay::TYPE_BOOL_LIST:
-				break;
-			case VRay::TYPE_VECTOR_LIST:
-				break;
-			case VRay::TYPE_COLOR_LIST:
-				break;
-			case VRay::TYPE_STRING_LIST:
-				break;
-			case VRay::TYPE_PLUGIN_LIST:
-				break;
-			case VRay::TYPE_TEXTURE_LIST:
-				break;
-			case VRay::TYPE_TEXTUREFLOAT_LIST:
-				break;
-			case VRay::TYPE_TEXTUREMATRIX_LIST:
-				break;
-			case VRay::TYPE_TEXTURETRANSFORM_LIST:
-				break;
-			case VRay::TYPE_OUTPUTTEXTURE:
-				break;
-			case VRay::TYPE_OUTPUTTEXTUREFLOAT:
-				break;
-			case VRay::TYPE_OUTPUTTEXTUREINT:
-				break;
-			case VRay::TYPE_OUTPUTTEXTUREVECTOR:
-				break;
-			case VRay::TYPE_OUTPUTTEXTUREMATRIX:
-				break;
-			case VRay::TYPE_OUTPUTTEXTURETRANSFORM:
-				break;
-			case VRay::TYPE_UNSPECIFIED:
-				break;
-			case VRay::TYPE_ERROR:
-				break;
-			default:
 				break;
 			}
 		}
@@ -714,48 +580,31 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel1, TArray<FV
 	node.set_geometry(mesh);
 }
 
-/*
-bool AVrayInterface::ApplyBitmap(FString bitMapPath, FString nodeName)
-{
-	//https://devlearn.chaosgroup.com/mod/lesson/view.php?id=268
-	// Create a bitmap buffer which can load data from a file
-	BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
-	//bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));//verificar 
-	bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
-
-	TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
-	// Set the texture to use the loaded buffer
-	texBitmap.set_bitmap(bitmapBuffer);
-
-	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
-	//VRay::Plugins::Mtl2Sided twoSidedMat = renderer.getPlugin<Mtl2Sided>(node.get_material().getName());
-	MtlSingleBRDF mat = plugin_cast<MtlSingleBRDF>(node.get_material());
-	BRDFVRayMtl bRDFVRayMtl = plugin_cast<BRDFVRayMtl>(mat.get_brdf());//se cast falhar, corrigir
-	return (bRDFVRayMtl.set_diffuse(texBitmap));
-
-}*/
-
 void AVrayInterface::editMaterial(FString bitMapPath, FString nodeName, FLinearColor color)
 {
-	//para alternar entre cor e textura, limpar bitmap
 	Node node = renderer.getPlugin<Node>(TCHAR_TO_UTF8(*nodeName));
 	MtlSingleBRDF mat = renderer.getPlugin<MtlSingleBRDF>(node.get_material().getName());
 	BRDFVRayMtl brdf = plugin_cast<BRDFVRayMtl>(mat.get_brdf());
-//#nullPath tá feio, arrumar isso
-	if (bitMapPath=="nullPath")//se cancelou o carregamento da textura 
+	if (bitMapPath.IsEmpty())
 	{
-		if (brdf.get_diffuse().getType()==TYPE_PLUGIN)//se diffuse está sendo usado como textura
+		brdf.set_diffuse(AColor(color.R, color.G, color.B, color.A)); //define a cor
+	}
+	else
+	{
+		//#implementar otimizacao para nao criar estes plugins caso ja exista
+		/*if (brdf.get_diffuse().getType()==TYPE_PLUGIN)
 		{
 			TexBitmap texBitmap = plugin_cast<TexBitmap>(brdf.get_diffuse().as<Plugin>());
 			BitmapBuffer bitmapBuffer = plugin_cast<BitmapBuffer>(texBitmap.get_bitmap());
-			bitmapBuffer.set_file(NULL);//limpa o slot
-		}
-		brdf.set_diffuse(AColor(color.R, color.G, color.B, color.A)); //define a cor
-		return;
+		}*/
+		BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+		bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
+		TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+		texBitmap.set_bitmap(bitmapBuffer);
+		brdf.set_diffuse(texBitmap);
 	}
-	else//caminho do bitmap é validoç
-	{
-		if (brdf.get_diffuse().getType()==TYPE_PLUGIN)
+	/*
+		if (!(brdf.get_diffuse().as<Plugin>()).isEmpty())//if plugin is not empty
 		{
 			TexBitmap texBitmap = plugin_cast<TexBitmap>(brdf.get_diffuse().as<Plugin>());
 			BitmapBuffer bitmapBuffer = plugin_cast<BitmapBuffer>(texBitmap.get_bitmap());
@@ -764,17 +613,16 @@ void AVrayInterface::editMaterial(FString bitMapPath, FString nodeName, FLinearC
 				bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
 				texBitmap.set_bitmap(bitmapBuffer);
 			}
-			brdf.set_diffuse(texBitmap);
-			return;
+			else
+			{
+				BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
+				bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
+				TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
+				texBitmap.set_bitmap(bitmapBuffer);
+			}
 		}
-		BitmapBuffer bitmapBuffer = renderer.newPlugin<BitmapBuffer>();
-		bitmapBuffer.set_file(TCHAR_TO_UTF8(*bitMapPath));
-		TexBitmap texBitmap = renderer.newPlugin<TexBitmap>();
-		texBitmap.set_bitmap(bitmapBuffer);
-		brdf.set_diffuse(texBitmap);
-	}
+	}*/
 }
-
 
 void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName)
 {
