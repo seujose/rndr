@@ -1,15 +1,10 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "RndrNode.h"
-
-
 #include "GameFramework/Actor.h"
 #include "vraysdk.hpp"
 #include "vrayplugins.hpp"
 #include "VrayInterface.generated.h"
-
- 
 
 UENUM(BlueprintType)
 enum class EVrayPluginType : uint8
