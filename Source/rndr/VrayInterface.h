@@ -26,9 +26,7 @@ class RNDR_API AVrayInterface : public AActor
 	GENERATED_BODY()
 public:	
 	AVrayInterface();
-
 	VRay::VRayRenderer renderer;
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
 			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, TArray<int32>&mapChannelfacesOut);
@@ -46,14 +44,11 @@ public:
 		void Render(int renderMode);
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
-
 	UFUNCTION(BlueprintCallable, meta = (AutoCreateRefTerm = "transformIn, nameIn, colorIn, intIn, floatArrayIn, GeneralString, boolin"))
 		void SetVrayPluginParameter( bool&ParamSetSuccessfully, EVrayPluginType PluginType,
 	TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, 
 	TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, 
 	FString  stringIn, bool boolin);
-
-
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,FString&ParameterValue);
 	UFUNCTION(BlueprintCallable, Category = "vray")
@@ -62,10 +57,6 @@ public:
 		bool ApplyBitmap(FString bitMapPath, FString nodeName);*/
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void editMaterial(FString bitMapPath, FString nodeName, FLinearColor color);
-
-
-	
-
 protected:
 	virtual void BeginPlay() override;
 public:	

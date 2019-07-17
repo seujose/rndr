@@ -66,7 +66,6 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	renderer.setAutoCommit(true);
 	renderer.startSync();
 	renderer.setKeepInteractiveRunning(true);
-	
 }
 
 VRay::VRayInit init(true);
