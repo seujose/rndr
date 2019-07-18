@@ -33,9 +33,9 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourO
 	{
 	case 1:
 	{
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
-		aiNode* temp = *scene->mRootNode->mChildren;
-		aiMatrix4x4 sceneT = temp->mTransformation;
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded|aiProcess_PreTransformVertices);
+
+		aiMatrix4x4 sceneT = scene->mRootNode->mTransformation;
 
 		aiVector3D theScale;
 		aiVector3D theRotation;
@@ -53,7 +53,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourO
 		outScale.Y = theScale.y;
 		outScale.Z = theScale.z;
 		transformOut.EmplaceAt(0, outScale);
-
 
 		outRotation.X = theRotation.x;
 		outRotation.Y = theRotation.y;
