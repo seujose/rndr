@@ -24,62 +24,51 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
+bool ARndrAssimp::getMeshInfo(TArray<FQuat>&outQuat, TArray<FVector>&transformOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
-	
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
 	switch (importSwitch)
 	{
 	case 1:
 	{
-		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded|aiProcess_PreTransformVertices);
-
-		aiMatrix4x4 sceneT = scene->mRootNode->mTransformation;
-
-		aiVector3D theScale;
-		aiVector3D theRotation;
-		aiVector3D thePosition;
-
-		//sceneT.Transpose();
-		sceneT.Decompose(theScale, theRotation, thePosition);
-		transformOut.Empty();
-
-		FVector outScale;
-		FVector outRotation;
-		FVector outPosition;
-
-		outScale.X = theScale.x;
-		outScale.Y = theScale.y;
-		outScale.Z = theScale.z;
-		transformOut.EmplaceAt(0, outScale);
-
-		outRotation.X = theRotation.x;
-		outRotation.Y = theRotation.y;
-		outRotation.Z = theRotation.z;
-		transformOut.EmplaceAt(1, outRotation);
-
-		outPosition.X = thePosition.x;
-		outPosition.Y = thePosition.y;
-		outPosition.Z = thePosition.z;
-		transformOut.EmplaceAt(2, outPosition);
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
 	}
 	break;
-		
 	case 2:
 	{
 		scene = importer.ReadFile(TCHAR_TO_UTF8(*FilePath), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
 	}
 	break;
 	}
-	
-
-	
-
-
 	if (scene!=NULL)
-	{//#otimizar com auto
-		//UE_LOG(LogTemp, Warning, TEXT("mesh (%s)-> uv count (%d) "),*FilePath , scene->mMeshes[0]->GetNumUVChannels());
+	{
+		//#otimizar com auto
+		if (scene->HasMeshes())
+		{
+			aiVector3D theScale;
+			aiQuaternion theRotation;
+			aiVector3D thePosition; 
+			FVector temp;
+			FQuat tempQuat;
+			for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
+			{
+				scene->mRootNode->mChildren[i]->mTransformation.Decompose(theScale, theRotation, thePosition);
+				
+				temp.Set(theScale.x, theScale.y, theScale.z);
+				transformOut.Add(temp);
+
+				tempQuat.W = theRotation.w;
+				tempQuat.X = theRotation.x;
+				tempQuat.Y = theRotation.y;
+				tempQuat.Z = theRotation.z;
+				outQuat.Add(tempQuat);
+
+				temp.Set(thePosition.x, thePosition.y, thePosition.z);
+				transformOut.Add(temp);
+				
+			}
+		}
 		if (scene->mMeshes[0]->mNumVertices>0)//previne crash lendo fbx de uma luz por exemplo
 		{
 			for (size_t i = 0; i < scene->mMeshes[0]->mNumVertices; i++)
@@ -155,8 +144,3 @@ bool ARndrAssimp::getMeshInfo(TArray<FVector>&transformOut, FLinearColor&colourO
 	}
 	return false;
 }
-
-
-/************************************************************************/
-/* UFUNCTIONS                                                           */
-/************************************************************************/

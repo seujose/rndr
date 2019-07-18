@@ -45,10 +45,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "vray")
 		void GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString>&PluginName);
 	UFUNCTION(BlueprintCallable, meta = (AutoCreateRefTerm = "transformIn, nameIn, colorIn, intIn, floatArrayIn, GeneralString, boolin"))
-		void SetVrayPluginParameter( bool&ParamSetSuccessfully, EVrayPluginType PluginType,
+		void SetVrayPluginParameter( FMatrix theMatrix, bool&ParamSetSuccessfully, EVrayPluginType PluginType,
 	TArray<FVector>transformIn, FString nameIn, FLinearColor colorIn, int32 intIn, 
 	TArray<float>floatArrayIn, FString ParameterName, bool resyncRender, 
-	FString  stringIn, bool boolin);
+	FString stringIn, bool boolin);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void GetVrayPluginParameter(TArray<FString>&propertyNamesOut, TArray<FString>&PropertyValuesOut, TArray<FString>&ParamTypeOut, EVrayPluginType PluginType, TArray<FVector>&transformOut, FString nameIn,FLinearColor&colorOut, int32&intOut, TArray<float>&floatArrayOut, bool&paramFound, FString ParameterName,FString&ParameterValue);
 	UFUNCTION(BlueprintCallable, Category = "vray")
