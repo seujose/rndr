@@ -332,13 +332,12 @@ void AVrayInterface::SetVrayPluginParameter(FMatrix theMatrix, bool&ParamSetSucc
 		break;
 		case VRay::TYPE_TRANSFORM:
 		{
-			VRay::Transform t;
-			t.matrix.v0.set(transformIn[2].X, transformIn[0].Y, transformIn[0].Z);
-			t.matrix.v1.set(transformIn[0].X, transformIn[2].Y, transformIn[0].Z);
-			t.matrix.v2.set(transformIn[0].X, transformIn[0].Y, transformIn[2].Z);
 
-			t.offset.set(transformIn[1].X, transformIn[1].Y, transformIn[1].Z);
-//			t.matrix.set(Vector(1.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0));
+			VRay::Transform t;
+			t.matrix[0].set(transformIn[0].X, transformIn[0].Y, transformIn[0].Z);
+			t.matrix[1].set(transformIn[1].X, transformIn[1].Y, transformIn[1].Z);
+			t.matrix[2].set(transformIn[2].X, transformIn[2].Y, transformIn[2].Z);
+			t.offset.set(transformIn[3].X, transformIn[3].Y, transformIn[3].Z);
 
 
 			if (plugin.setValue(TCHAR_TO_UTF8(*ParameterName), t))
