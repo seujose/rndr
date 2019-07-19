@@ -24,7 +24,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 /* implementations                                                      */
 /************************************************************************/
 
-bool ARndrAssimp::getMeshInfo(TArray<FQuat>&outQuat, TArray<FVector>&transformOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
+bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
@@ -46,27 +46,27 @@ bool ARndrAssimp::getMeshInfo(TArray<FQuat>&outQuat, TArray<FVector>&transformOu
 		//#otimizar com auto
 		if (scene->HasMeshes())
 		{
-			aiVector3D theScale;
-			aiQuaternion theRotation;
-			aiVector3D thePosition; 
-			FVector temp;
-			FQuat tempQuat;
+			aiVector3D assimpScale;
+			aiQuaternion assimpRotation;
+			aiVector3D assimpPosition; 
 			for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
 			{
-				scene->mRootNode->mChildren[i]->mTransformation.Decompose(theScale, theRotation, thePosition);
+				scene->mRootNode->mChildren[i]->mTransformation.Decompose(assimpScale, assimpRotation, assimpPosition);
 				
-				temp.Set(theScale.x, theScale.y, theScale.z);
-				transformOut.Add(temp);
+				positionOut.X = assimpPosition.x;
+				positionOut.Y = assimpPosition.y;
+				positionOut.Z = assimpPosition.z;
 
-				tempQuat.W = theRotation.w;
-				tempQuat.X = theRotation.x;
-				tempQuat.Y = theRotation.y;
-				tempQuat.Z = theRotation.z;
-				outQuat.Add(tempQuat);
+				scaleOut.X = assimpScale.x;
+				scaleOut.Y = assimpScale.y;
+				scaleOut.Z = assimpScale.z;
 
-				temp.Set(thePosition.x, thePosition.y, thePosition.z);
-				transformOut.Add(temp);
-				
+				rotationOut.W = assimpRotation.w;
+				rotationOut.X = assimpRotation.x;
+				rotationOut.Y = assimpRotation.y;
+				rotationOut.Z = assimpRotation.z;
+
+				UE_LOG(LogTemp, Warning, TEXT("%s rotation(%s) location(%s) scale(%s)"), *FilePath, *rotationOut.ToString(),*positionOut.ToString(), *scaleOut.ToString());
 			}
 		}
 		if (scene->mMeshes[0]->mNumVertices>0)//previne crash lendo fbx de uma luz por exemplo
@@ -139,7 +139,6 @@ bool ARndrAssimp::getMeshInfo(TArray<FQuat>&outQuat, TArray<FVector>&transformOu
 				}
 			}
 		}
-
 		return true;
 	}
 	return false;

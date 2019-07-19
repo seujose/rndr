@@ -13,7 +13,7 @@ public:
 	ARndrAssimp();
 	 
 	UFUNCTION(BlueprintCallable, Category = "Assimp")
-		bool getMeshInfo(TArray<FQuat>&outQuat, TArray<FVector>&transformOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo);
+		bool getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo);
 	
 protected:
 	virtual void BeginPlay() override;
