@@ -144,3 +144,124 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 	}
 	return false;
 }
+
+bool ARndrAssimp::openMesh(FString path, int32& SectionCount, FString& ErrorCode)
+{
+	Assimp::Importer importer;
+	std::string filename(TCHAR_TO_UTF8(*path));
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+	if (!scene)
+	{
+		ErrorCode = importer.GetErrorString();
+		return false;
+	}
+	_meshCurrentlyProcessed = 0;
+	processNode(scene->mRootNode, scene);
+	SectionCount = _meshCurrentlyProcessed;
+	return true;
+
+}
+
+bool ARndrAssimp::getSection(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, int32 index, TArray<FVector>& Vertices, TArray<int32>& Faces, TArray<FVector>& Normals, TArray<FVector2D>& UV, TArray<FVector>& Tangents)
+{
+	if (index >= _meshCurrentlyProcessed)
+	{
+		return false;
+	}
+	Vertices = _vertices[index];
+	Faces = _indices[index];
+	Normals = _normals[index];
+	UV = _uvs[index];
+	Tangents = _tangents[index];
+	colourOut= _color[index];
+
+	return true;
+}
+
+void ARndrAssimp::clear()
+{
+	_vertices.Empty();
+	_indices.Empty();
+	_normals.Empty();
+	_uvs.Empty();
+	_tangents.Empty();
+	_vertexColors.Empty();
+	_meshCurrentlyProcessed = 0;
+}
+
+void ARndrAssimp::processNode(aiNode* node, const aiScene* scene)
+{
+	for (uint32 i = 0; i < node->mNumMeshes; i++) 
+	{
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		processMesh(mesh, scene);
+		++_meshCurrentlyProcessed;
+	}
+	uint32 nodes = node->mNumMeshes;
+	for (uint32 i = 0; i < node->mNumChildren; i++) 
+	{
+		processNode(node->mChildren[i], scene);
+	}
+
+}
+
+void ARndrAssimp::processMesh(aiMesh* mesh, const aiScene* scene)
+{
+	if (_vertices.Num() <= _meshCurrentlyProcessed) 
+	{
+		_vertices.AddZeroed();
+		_normals.AddZeroed();
+		_uvs.AddZeroed();
+		_tangents.AddZeroed();
+		_vertexColors.AddZeroed();
+		_indices.AddZeroed();
+	}
+
+	if (mesh->mNumVertices != _vertices[_meshCurrentlyProcessed].Num())
+		_requiresFullRecreation = true;
+
+	_vertices[_meshCurrentlyProcessed].Empty();
+	_normals[_meshCurrentlyProcessed].Empty();
+	_uvs[_meshCurrentlyProcessed].Empty();
+	_tangents[_meshCurrentlyProcessed].Empty();
+	_vertexColors[_meshCurrentlyProcessed].Empty();
+	_indices[_meshCurrentlyProcessed].Empty();
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++) 
+	{
+		FVector vertex, normal;
+		vertex.X = mesh->mVertices[i].x;
+		vertex.Y = mesh->mVertices[i].y;
+		vertex.Z = mesh->mVertices[i].z;
+
+		normal.X = mesh->mNormals[i].x;
+		normal.Y = mesh->mNormals[i].y;
+		normal.Z = mesh->mNormals[i].z;
+
+		if (mesh->mTextureCoords[0]) 
+		{
+			FVector2D uvs;
+			uvs.X = mesh->mTextureCoords[0][i].x;
+			uvs.Y = mesh->mTextureCoords[0][i].y;
+			_uvs[_meshCurrentlyProcessed].Add(uvs);
+		}
+		else 
+		{
+			_uvs[_meshCurrentlyProcessed].Add(FVector2D(0.f, 0.f));
+		}
+		_vertices[_meshCurrentlyProcessed].Add(vertex);
+		_normals[_meshCurrentlyProcessed].Add(normal);
+	}
+
+	if (_requiresFullRecreation) 
+	{
+		for (uint32 i = 0; i < mesh->mNumFaces; i++) 
+		{
+			aiFace face = mesh->mFaces[i];
+			_indices[_meshCurrentlyProcessed].Add(face.mIndices[2]);
+			_indices[_meshCurrentlyProcessed].Add(face.mIndices[1]);
+			_indices[_meshCurrentlyProcessed].Add(face.mIndices[0]);
+		}
+	}
+}
+
