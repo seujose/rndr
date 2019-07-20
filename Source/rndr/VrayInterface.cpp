@@ -15,7 +15,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	VRayRenderer::VFB& vfb = renderer.vfb;
 	vfb.enableProgressBar(true);
 	vfb.show(true /*show*/, true /*setFocus*/);     // The window is visible and auto focused
-	vfb.setPositionAndSize(1284, 445, 640, 640);         // Position in screen-space and size in pixels
+	vfb.setPositionAndSize(1287, 448, 640, 640);         // Position in screen-space and size in pixels
 	vfb.enableInteractivity(true);
 	vfb.setAlwaysOnTop(true);
 	renderer.setImageSize(512, 512, true, true);

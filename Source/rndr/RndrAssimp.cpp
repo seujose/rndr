@@ -16,13 +16,6 @@ void ARndrAssimp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-/************************************************************************/
-/* forward declarations                                                 */
-/************************************************************************/
-
-/************************************************************************/
-/* implementations                                                      */
-/************************************************************************/
 
 bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
@@ -49,8 +42,16 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 			aiVector3D assimpScale;
 			aiQuaternion assimpRotation;
 			aiVector3D assimpPosition; 
+			FString tempFString;
+			string tempString;
+
 			for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
 			{
+				aiNode*theRootNode;
+				theRootNode = scene->mRootNode;
+				tempFString = theRootNode->mName.C_Str();
+				UE_LOG(LogTemp, Warning, TEXT("root node (%s)"), *tempFString);
+				
 				scene->mRootNode->mChildren[i]->mTransformation.Decompose(assimpScale, assimpRotation, assimpPosition);
 				
 				positionOut.X = assimpPosition.x;
