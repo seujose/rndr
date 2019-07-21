@@ -3,10 +3,17 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include <vector>
+#include "rndrStream.h"
+#include <iostream>
 using namespace Assimp;
+using namespace std;
+rndrStream theStream;
+
+
 ARndrAssimp::ARndrAssimp()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	std::cout.rdbuf(&theStream);
 }
 void ARndrAssimp::BeginPlay()
 {
@@ -16,6 +23,13 @@ void ARndrAssimp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&hahah);
+void processarMesh(aiMesh*mesh, const aiScene* scene);
+
+
+
+
 
 bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
@@ -50,7 +64,7 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 				aiNode*theRootNode;
 				theRootNode = scene->mRootNode;
 				tempFString = theRootNode->mName.C_Str();
-				UE_LOG(LogTemp, Warning, TEXT("root node (%s)"), *tempFString);
+				//UE_LOG(LogTemp, Warning, TEXT("root node (%s)"), *tempFString);
 				
 				scene->mRootNode->mChildren[i]->mTransformation.Decompose(assimpScale, assimpRotation, assimpPosition);
 				
@@ -67,7 +81,7 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 				rotationOut.Y = assimpRotation.y;
 				rotationOut.Z = assimpRotation.z;
 
-				UE_LOG(LogTemp, Warning, TEXT("%s rotation(%s) location(%s) scale(%s)"), *FilePath, *rotationOut.ToString(),*positionOut.ToString(), *scaleOut.ToString());
+				//UE_LOG(LogTemp, Warning, TEXT("%s rotation(%s) ocation(%s) scale(%s)"), *FilePath, *rotationOut.ToString(),*positionOut.ToString(), *scaleOut.ToString());
 			}
 		}
 		if (scene->mMeshes[0]->mNumVertices>0)//previne crash lendo fbx de uma luz por exemplo
@@ -144,124 +158,56 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 	}
 	return false;
 }
-
-bool ARndrAssimp::openMesh(FString path, int32& SectionCount, FString& ErrorCode)
+void processarMesh(aiMesh*mesh, const aiScene* scene)
+{
+	cout<<"mesh->mNumFaces("<< mesh->mNumFaces<<")"<<endl;
+}
+void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo)
+{
+	for (size_t i = 0; i < node->mNumMeshes; i++)
+	{
+		FMeshInfo tempMeshInfo;
+		aiVector3D aiPosition, aiScale, parentPos, parentScale;
+		aiQuaternion aiRotation, parentRotation;
+		aiMatrix4x4 nodeTransform = node->mParent->mTransformation;
+		if (node->mParent->mParent!=NULL)
+		{
+			aiMatrix4x4 nodeTransformParent = node->mParent->mParent->mTransformation;
+			nodeTransformParent.Decompose(parentScale, parentRotation, parentPos);
+			tempMeshInfo.parentPosition.Set(parentPos.x, parentPos.y, parentPos.z);
+			tempMeshInfo.parentName = node->mParent->mParent->mName.C_Str();
+		}
+		nodeTransform.Decompose(aiScale, aiRotation, aiPosition);
+		tempMeshInfo.position.Set(aiPosition.x, aiPosition.y, aiPosition.z);
+		tempMeshInfo.scale.Set(aiScale.x, aiScale.y, aiScale.z);
+		tempMeshInfo.rotation.W = aiRotation.w;
+		tempMeshInfo.rotation.X = aiRotation.x;
+		tempMeshInfo.rotation.Y = aiRotation.y;
+		tempMeshInfo.rotation.Z = aiRotation.z;
+		tempMeshInfo.name = node->mName.C_Str();
+		meshInfo.Add(tempMeshInfo);
+		/*cout << "***************************\nnode name(" << node->mName.C_Str() << ")\n" << 
+		"node pos(" << aiPosition.x << ")" << "(" << aiPosition.y << ")" << "(" << aiPosition.z << ")\n"<< 
+		"node rot(" << aiRotation.x << ")" << "(" << aiRotation.y << ")" << "(" << aiRotation.z << ")\n" << 
+		"node scale(" << aiScale.x << ")" << "(" << aiScale.y << ")" << "(" << aiScale.z << ")" << endl;*/
+		aiMesh*mesh = scene->mMeshes[node->mMeshes[i]];
+		processarMesh(mesh, scene);
+	}
+	for (size_t i = 0; i < node->mNumChildren; i++)
+	{
+		processarNode(node->mChildren[i], scene, meshInfo);
+	}
+}
+bool ARndrAssimp::newMeshInfo(FString path, TArray<FMeshInfo>&meshInfo)
 {
 	Assimp::Importer importer;
-	std::string filename(TCHAR_TO_UTF8(*path));
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
-	if (!scene)
+	const aiScene*scene = nullptr;
+	scene = importer.ReadFile(TCHAR_TO_UTF8(*path), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+	if (scene != NULL)
 	{
-		ErrorCode = importer.GetErrorString();
-		return false;
+		processarNode(scene->mRootNode, scene, meshInfo);
+		return true;
 	}
-	_meshCurrentlyProcessed = 0;
-	processNode(scene->mRootNode, scene);
-	SectionCount = _meshCurrentlyProcessed;
-	return true;
-
-}
-
-bool ARndrAssimp::getSection(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, int32 index, TArray<FVector>& Vertices, TArray<int32>& Faces, TArray<FVector>& Normals, TArray<FVector2D>& UV, TArray<FVector>& Tangents)
-{
-	if (index >= _meshCurrentlyProcessed)
-	{
-		return false;
-	}
-	Vertices = _vertices[index];
-	Faces = _indices[index];
-	Normals = _normals[index];
-	UV = _uvs[index];
-	Tangents = _tangents[index];
-	colourOut= _color[index];
-
-	return true;
-}
-
-void ARndrAssimp::clear()
-{
-	_vertices.Empty();
-	_indices.Empty();
-	_normals.Empty();
-	_uvs.Empty();
-	_tangents.Empty();
-	_vertexColors.Empty();
-	_meshCurrentlyProcessed = 0;
-}
-
-void ARndrAssimp::processNode(aiNode* node, const aiScene* scene)
-{
-	for (uint32 i = 0; i < node->mNumMeshes; i++) 
-	{
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		processMesh(mesh, scene);
-		++_meshCurrentlyProcessed;
-	}
-	uint32 nodes = node->mNumMeshes;
-	for (uint32 i = 0; i < node->mNumChildren; i++) 
-	{
-		processNode(node->mChildren[i], scene);
-	}
-
-}
-
-void ARndrAssimp::processMesh(aiMesh* mesh, const aiScene* scene)
-{
-	if (_vertices.Num() <= _meshCurrentlyProcessed) 
-	{
-		_vertices.AddZeroed();
-		_normals.AddZeroed();
-		_uvs.AddZeroed();
-		_tangents.AddZeroed();
-		_vertexColors.AddZeroed();
-		_indices.AddZeroed();
-	}
-
-	if (mesh->mNumVertices != _vertices[_meshCurrentlyProcessed].Num())
-		_requiresFullRecreation = true;
-
-	_vertices[_meshCurrentlyProcessed].Empty();
-	_normals[_meshCurrentlyProcessed].Empty();
-	_uvs[_meshCurrentlyProcessed].Empty();
-	_tangents[_meshCurrentlyProcessed].Empty();
-	_vertexColors[_meshCurrentlyProcessed].Empty();
-	_indices[_meshCurrentlyProcessed].Empty();
-
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++) 
-	{
-		FVector vertex, normal;
-		vertex.X = mesh->mVertices[i].x;
-		vertex.Y = mesh->mVertices[i].y;
-		vertex.Z = mesh->mVertices[i].z;
-
-		normal.X = mesh->mNormals[i].x;
-		normal.Y = mesh->mNormals[i].y;
-		normal.Z = mesh->mNormals[i].z;
-
-		if (mesh->mTextureCoords[0]) 
-		{
-			FVector2D uvs;
-			uvs.X = mesh->mTextureCoords[0][i].x;
-			uvs.Y = mesh->mTextureCoords[0][i].y;
-			_uvs[_meshCurrentlyProcessed].Add(uvs);
-		}
-		else 
-		{
-			_uvs[_meshCurrentlyProcessed].Add(FVector2D(0.f, 0.f));
-		}
-		_vertices[_meshCurrentlyProcessed].Add(vertex);
-		_normals[_meshCurrentlyProcessed].Add(normal);
-	}
-
-	if (_requiresFullRecreation) 
-	{
-		for (uint32 i = 0; i < mesh->mNumFaces; i++) 
-		{
-			aiFace face = mesh->mFaces[i];
-			_indices[_meshCurrentlyProcessed].Add(face.mIndices[2]);
-			_indices[_meshCurrentlyProcessed].Add(face.mIndices[1]);
-			_indices[_meshCurrentlyProcessed].Add(face.mIndices[0]);
-		}
-	}
+	return false;
 }
 
