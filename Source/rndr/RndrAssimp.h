@@ -9,12 +9,17 @@
 using namespace std;
 using namespace Assimp;
 
+ 
 
 USTRUCT(BlueprintType)
 struct FMeshInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadOnly, Category="meshInfo")
+		UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<FString>texturesPath;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		FLinearColor color;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		FVector position;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		FQuat rotation;
@@ -32,6 +37,12 @@ struct FMeshInfo
 		TArray<FVector>normals;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		TArray<int32>faces;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<int32>faceNormals;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<FVector2D>uv0;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<FVector2D>uv1;
 	FMeshInfo()
 	{
 	};

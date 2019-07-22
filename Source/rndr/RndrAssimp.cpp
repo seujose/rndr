@@ -161,7 +161,6 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
 { 
 	FVector tempFVector;
-	cout << "mesh->mNumFaces(" << mesh->mNumFaces << ")" << endl;
 	for (size_t i = 0; i < mesh->mNumVertices; i++)
 	{
 		tempFVector.X = mesh->mVertices[i].x;
@@ -173,12 +172,37 @@ void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
 		tempFVector.Y = mesh->mNormals[i].y;
 		tempFVector.Z = mesh->mNormals[i].z;
 		meshInfo.normals.Add(tempFVector);
+
+
+		
 	}
 	for (size_t i = 0; i < mesh->mNumFaces; i++)
 	{
 		meshInfo.faces.Add(mesh->mFaces[i].mIndices[2]);
 		meshInfo.faces.Add(mesh->mFaces[i].mIndices[1]);
 		meshInfo.faces.Add(mesh->mFaces[i].mIndices[0]);
+	}
+	if (mesh->HasTextureCoords(0))//#otimizar
+	{
+		FVector2D tempVector2D;
+		for (size_t j = 0; j < mesh->mNumVertices; j++)
+		{
+			aiVector3D *meshTextureCoord = &mesh->mTextureCoords[0][j];
+			tempVector2D.X = meshTextureCoord->x;
+			tempVector2D.Y = meshTextureCoord->y;
+			meshInfo.uv0.Add(tempVector2D);
+		}
+	}
+	if (mesh->HasTextureCoords(1))//#otimizar
+	{
+		FVector2D tempVector2D;
+		for (size_t j = 0; j < mesh->mNumVertices; j++)
+		{
+			aiVector3D *meshTextureCoord = &mesh->mTextureCoords[1][j];
+			tempVector2D.X = meshTextureCoord->x;
+			tempVector2D.Y = meshTextureCoord->y;
+			meshInfo.uv1.Add(tempVector2D);
+		}
 	}
 }
 
