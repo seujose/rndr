@@ -25,7 +25,7 @@ void ARndrAssimp::Tick(float DeltaTime)
 }
 
 void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&hahah);
-void processarMesh(aiMesh*mesh, const aiScene* scene);
+void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo);
 
 
 
@@ -158,10 +158,30 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 	}
 	return false;
 }
-void processarMesh(aiMesh*mesh, const aiScene* scene)
-{
-	cout<<"mesh->mNumFaces("<< mesh->mNumFaces<<")"<<endl;
+void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
+{ 
+	FVector tempFVector;
+	cout << "mesh->mNumFaces(" << mesh->mNumFaces << ")" << endl;
+	for (size_t i = 0; i < mesh->mNumVertices; i++)
+	{
+		tempFVector.X = mesh->mVertices[i].x;
+		tempFVector.Y = mesh->mVertices[i].y;
+		tempFVector.Z = mesh->mVertices[i].z;
+		meshInfo.vertices.Add(tempFVector);
+
+		tempFVector.X = mesh->mNormals[i].x;
+		tempFVector.Y = mesh->mNormals[i].y;
+		tempFVector.Z = mesh->mNormals[i].z;
+		meshInfo.normals.Add(tempFVector);
+	}
+	for (size_t i = 0; i < mesh->mNumFaces; i++)
+	{
+		meshInfo.faces.Add(mesh->mFaces[i].mIndices[2]);
+		meshInfo.faces.Add(mesh->mFaces[i].mIndices[1]);
+		meshInfo.faces.Add(mesh->mFaces[i].mIndices[0]);
+	}
 }
+
 void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo)
 {
 	for (size_t i = 0; i < node->mNumMeshes; i++)
@@ -185,13 +205,13 @@ void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo)
 		tempMeshInfo.rotation.Y = aiRotation.y;
 		tempMeshInfo.rotation.Z = aiRotation.z;
 		tempMeshInfo.name = node->mName.C_Str();
-		meshInfo.Add(tempMeshInfo);
 		/*cout << "***************************\nnode name(" << node->mName.C_Str() << ")\n" << 
 		"node pos(" << aiPosition.x << ")" << "(" << aiPosition.y << ")" << "(" << aiPosition.z << ")\n"<< 
 		"node rot(" << aiRotation.x << ")" << "(" << aiRotation.y << ")" << "(" << aiRotation.z << ")\n" << 
 		"node scale(" << aiScale.x << ")" << "(" << aiScale.y << ")" << "(" << aiScale.z << ")" << endl;*/
 		aiMesh*mesh = scene->mMeshes[node->mMeshes[i]];
-		processarMesh(mesh, scene);
+		processarMesh(mesh, scene, tempMeshInfo);
+		meshInfo.Add(tempMeshInfo);
 	}
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{

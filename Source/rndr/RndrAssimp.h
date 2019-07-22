@@ -26,6 +26,15 @@ struct FMeshInfo
 		FVector parentPosition;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		FString parentName;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<FVector>vertices;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<FVector>normals;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		TArray<int32>faces;
+	FMeshInfo()
+	{
+	};
 };
 
 
