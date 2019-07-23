@@ -23,15 +23,12 @@ void ARndrAssimp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo, bool&leftHanded);
+void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo, bool&leftHanded);
 
-void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&hahah);
-void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo);
-
-
-
-
-
-bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
+bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut,
+	TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, 
+	TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo)
 {
 	Assimp::Importer importer;
 	const aiScene*scene=nullptr;
@@ -158,23 +155,34 @@ bool ARndrAssimp::getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&sc
 	}
 	return false;
 }
-void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
+void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo, bool&leftHanded)
 { 
 	FVector tempFVector;
 	for (size_t i = 0; i < mesh->mNumVertices; i++)
 	{
 		tempFVector.X = mesh->mVertices[i].x;
-		tempFVector.Y = mesh->mVertices[i].y;
+		if (leftHanded)
+		{
+			tempFVector.Y = mesh->mVertices[i].y;
+		}
+		else
+		{
+			tempFVector.Y = mesh->mVertices[i].y*-1;
+		}
 		tempFVector.Z = mesh->mVertices[i].z;
 		meshInfo.vertices.Add(tempFVector);
 
 		tempFVector.X = mesh->mNormals[i].x;
-		tempFVector.Y = mesh->mNormals[i].y;
+		if (leftHanded)
+		{
+			tempFVector.Y = mesh->mNormals[i].y;
+		}
+		else
+		{
+			tempFVector.Y = mesh->mNormals[i].y*-1;
+		}
 		tempFVector.Z = mesh->mNormals[i].z;
 		meshInfo.normals.Add(tempFVector);
-
-
-		
 	}
 	for (size_t i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -182,6 +190,28 @@ void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
 		meshInfo.faces.Add(mesh->mFaces[i].mIndices[1]);
 		meshInfo.faces.Add(mesh->mFaces[i].mIndices[0]);
 	}
+	//find material
+	const aiMaterial*meshMaterial = scene->mMaterials[mesh->mMaterialIndex];
+	if (meshMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+	{
+		aiString path;
+		if (meshMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+		{
+			meshInfo.texturesPath.Add(path.C_Str());
+		}
+	}
+	else
+	{
+		aiColor4D assimpColor;
+		if (AI_SUCCESS == aiGetMaterialColor(meshMaterial, AI_MATKEY_COLOR_DIFFUSE, &assimpColor))
+		{
+			meshInfo.color.R = assimpColor.r;
+			meshInfo.color.G = assimpColor.g;
+			meshInfo.color.B = assimpColor.b;
+			meshInfo.color.A = assimpColor.a;
+		}
+	}
+	//find texture coord
 	if (mesh->HasTextureCoords(0))//#otimizar
 	{
 		FVector2D tempVector2D;
@@ -206,19 +236,25 @@ void processarMesh(aiMesh*mesh, const aiScene* scene, FMeshInfo&meshInfo)
 	}
 }
 
-void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo)
+void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo, bool&leftHanded)
 {
 	for (size_t i = 0; i < node->mNumMeshes; i++)
-	{
+	{ 
 		FMeshInfo tempMeshInfo;
-		aiVector3D aiPosition, aiScale, parentPos, parentScale;
-		aiQuaternion aiRotation, parentRotation;
+		aiVector3D aiPosition, aiScale, parentPos, parentScl;
+		aiQuaternion aiRotation, parentRot;
 		aiMatrix4x4 nodeTransform = node->mParent->mTransformation;
-		if (node->mParent->mParent!=NULL)
+		aiMatrix4x4 parentTransform;
+		if (node->mParent->mParent->mParent!=NULL)
 		{
-			aiMatrix4x4 nodeTransformParent = node->mParent->mParent->mTransformation;
-			nodeTransformParent.Decompose(parentScale, parentRotation, parentPos);
+			parentTransform = node->mParent->mParent->mParent->mTransformation;
+			parentTransform.Decompose(parentScl, parentRot, parentPos);
 			tempMeshInfo.parentPosition.Set(parentPos.x, parentPos.y, parentPos.z);
+			tempMeshInfo.parentScale.Set(parentScl.x, parentScl.y, parentScl.z);
+			tempMeshInfo.parentRotation.W = parentRot.w;
+			tempMeshInfo.parentRotation.X = parentRot.x;
+			tempMeshInfo.parentRotation.Y = parentRot.y;
+			tempMeshInfo.parentRotation.Z = parentRot.z;
 			tempMeshInfo.parentName = node->mParent->mParent->mName.C_Str();
 		}
 		nodeTransform.Decompose(aiScale, aiRotation, aiPosition);
@@ -229,27 +265,30 @@ void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo)
 		tempMeshInfo.rotation.Y = aiRotation.y;
 		tempMeshInfo.rotation.Z = aiRotation.z;
 		tempMeshInfo.name = node->mName.C_Str();
-		/*cout << "***************************\nnode name(" << node->mName.C_Str() << ")\n" << 
-		"node pos(" << aiPosition.x << ")" << "(" << aiPosition.y << ")" << "(" << aiPosition.z << ")\n"<< 
-		"node rot(" << aiRotation.x << ")" << "(" << aiRotation.y << ")" << "(" << aiRotation.z << ")\n" << 
-		"node scale(" << aiScale.x << ")" << "(" << aiScale.y << ")" << "(" << aiScale.z << ")" << endl;*/
 		aiMesh*mesh = scene->mMeshes[node->mMeshes[i]];
-		processarMesh(mesh, scene, tempMeshInfo);
+		processarMesh(mesh, scene, tempMeshInfo, leftHanded);
 		meshInfo.Add(tempMeshInfo);
 	}
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		processarNode(node->mChildren[i], scene, meshInfo);
+		processarNode(node->mChildren[i], scene, meshInfo, leftHanded);
 	}
 }
-bool ARndrAssimp::newMeshInfo(FString path, TArray<FMeshInfo>&meshInfo)
+bool ARndrAssimp::newMeshInfo(FString path, TArray<FMeshInfo>&meshInfoOut, bool leftHanded)//necessita várias otimizações
 {
 	Assimp::Importer importer;
 	const aiScene*scene = nullptr;
-	scene = importer.ReadFile(TCHAR_TO_UTF8(*path), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
-	if (scene != NULL)
+	if (leftHanded)
 	{
-		processarNode(scene->mRootNode, scene, meshInfo);
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*path), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+	}
+	else
+	{
+		scene = importer.ReadFile(TCHAR_TO_UTF8(*path), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+	}
+	if (scene != NULL)
+	{//#otimizar
+		processarNode(scene->mRootNode, scene, meshInfoOut, leftHanded);
 		return true;
 	}
 	return false;

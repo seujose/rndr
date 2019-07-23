@@ -28,9 +28,13 @@ struct FMeshInfo
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		FString name;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		FString parentName;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		FVector parentPosition;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
-		FString parentName;
+		FQuat parentRotation;
+	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
+		FVector parentScale;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
 		TArray<FVector>vertices;
 	UPROPERTY(BlueprintReadOnly, Category = "meshInfo")
@@ -60,7 +64,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Assimp")
 		bool getMeshInfo(FQuat&rotationOut, FVector&positionOut, FVector&scaleOut, FLinearColor&colourOut, TArray<FString>&textPath, TArray<FVector2D>&UV, FString FilePath, TArray<FVector>&vertices, TArray<FVector>&normals, TArray<int32>&faces, TArray<int32>&faceNormals, int32 importSwitch, TArray<FVector2D>&UVTwo);
 	UFUNCTION(BlueprintCallable, Category = "assimp")
-		bool newMeshInfo(FString path, TArray<FMeshInfo>&meshInfoOut);
+		bool newMeshInfo(FString path, TArray<FMeshInfo>&meshInfoOut, bool leftHanded);
 protected:
 	virtual void BeginPlay() override;
 public:	
