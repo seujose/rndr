@@ -244,18 +244,21 @@ void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo,
 		aiVector3D aiPosition, aiScale, parentPos, parentScl;
 		aiQuaternion aiRotation, parentRot;
 		aiMatrix4x4 nodeTransform = node->mParent->mTransformation;
+		aiMatrix4x4 parentTransform;
 		if (node->mParent->mParent->mParent!=NULL)
 		{
-			aiMatrix4x4 parentTransform = node->mParent->mParent->mParent->mTransformation;
-			parentTransform.Decompose(parentScl, parentRot, parentPos);
-			tempMeshInfo.parentPosition.Set(parentPos.x, parentPos.y, parentPos.z);
-			tempMeshInfo.parentScale.Set(parentScl.x, parentScl.y, parentScl.z);
-			tempMeshInfo.parentRotation.W = parentRot.w;
-			tempMeshInfo.parentRotation.X = parentRot.x;
-			tempMeshInfo.parentRotation.Y = parentRot.y;
-			tempMeshInfo.parentRotation.Z = parentRot.z;
+			parentTransform = node->mParent->mParent->mParent->mTransformation;
 			tempMeshInfo.parentName = node->mParent->mParent->mName.C_Str();
 		}
+		nodeTransform = nodeTransform * parentTransform;
+		parentTransform.Decompose(parentScl, parentRot, parentPos);
+		tempMeshInfo.parentPosition.Set(parentPos.x, parentPos.y, parentPos.z);
+		tempMeshInfo.parentScale.Set(parentScl.x, parentScl.y, parentScl.z);
+		tempMeshInfo.parentRotation.W = parentRot.w;
+		tempMeshInfo.parentRotation.X = parentRot.x;
+		tempMeshInfo.parentRotation.Y = parentRot.y;
+		tempMeshInfo.parentRotation.Z = parentRot.z;
+
 		nodeTransform.Decompose(aiScale, aiRotation, aiPosition);
 		tempMeshInfo.position.Set(aiPosition.x, aiPosition.y, aiPosition.z);
 		tempMeshInfo.scale.Set(aiScale.x, aiScale.y, aiScale.z);

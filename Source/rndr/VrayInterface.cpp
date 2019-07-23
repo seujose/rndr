@@ -600,7 +600,7 @@ void AVrayInterface::CreateGeomStaticMesh(TArray<FVector2D>UVChannel1, TArray<FV
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("(%s) uv channel two invalid"), *NodeName);
+		//UE_LOG(LogTemp, Warning, TEXT("(%s) uv channel two invalid"), *NodeName);
 	}
 
 	mesh.set_map_channels(map_channels);
