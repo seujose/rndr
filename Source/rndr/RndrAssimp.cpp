@@ -244,10 +244,9 @@ void processarNode(aiNode*node, const aiScene*scene, TArray<FMeshInfo>&meshInfo,
 		aiVector3D aiPosition, aiScale, parentPos, parentScl;
 		aiQuaternion aiRotation, parentRot;
 		aiMatrix4x4 nodeTransform = node->mParent->mTransformation;
-		aiMatrix4x4 parentTransform;
 		if (node->mParent->mParent->mParent!=NULL)
 		{
-			parentTransform = node->mParent->mParent->mParent->mTransformation;
+			aiMatrix4x4 parentTransform = node->mParent->mParent->mParent->mTransformation;
 			parentTransform.Decompose(parentScl, parentRot, parentPos);
 			tempMeshInfo.parentPosition.Set(parentPos.x, parentPos.y, parentPos.z);
 			tempMeshInfo.parentScale.Set(parentScl.x, parentScl.y, parentScl.z);
