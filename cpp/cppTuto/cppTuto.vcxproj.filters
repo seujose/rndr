@@ -15,21 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="assimpInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="assimpInterface.h">
+    <ClInclude Include="vrayInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="assimpInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vrayInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

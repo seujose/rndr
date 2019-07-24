@@ -669,6 +669,33 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
+void AVrayInterface::getPixelDataaa()
+{
+
+	RenderElement rawBuffer = renderer.getRenderElements().get(RenderElement::DIFFUSE);
+	/*string basePath = "C:/rndr/baked_";
+	string baseName = string(TCHAR_TO_UTF8(*nodeName));
+	string finalPath = basePath + baseName + "_" + rawBuffer.getName() + ".png";*/
+	fn_render(renderer, 1, 5000, 0.1);
+	renderer.waitForRenderEnd();
+	if (rawBuffer)
+	{
+		Plugin rawLithPlugin = rawBuffer.getPlugin();
+		VRayImage *image = rawBuffer.getImage();
+		if (image)
+		{
+			size_t count;
+			image->getPixelData(count);
+			image->toBitmapData(count);
+			//AColor theColor(image->getPixelData());
+			/*MemoryBuffer*teste;
+			size_t t;
+			image->toBitmapData(t, false, false, false, 0);
+			delete image;*/
+		}
+	}
+}
+
 void AVrayInterface::getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut, 
 	TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, TArray<int32>&mapChannelfacesOut)
 {
