@@ -6,19 +6,34 @@
 #include "assimpInterface.h"
 using namespace Assimp;
 
-void processNode(const aiScene*scene, aiNode*node, aiMatrix4x4 accTransform);
+void recursiveProcessNode(aiNode*node, SceneObject targetParent, const aiScene*scene, aiMatrix4x4 accTransform);
 
-void processNode(const aiScene*scene, aiNode*node, aiMatrix4x4 accTransform)
+void recursiveProcessNode(aiNode*node, SceneObject targetParent, const aiScene*scene, aiMatrix4x4 accTransform)
 {
+	SceneObject parent;
+	aiMatrix4x4 transform;
+	aiVector3D pos, scl;
+	aiQuaternion rot;
+	cout <<"node name("<< node->mName.C_Str()<<")"<<endl;
+	node->mTransformation.Decompose(scl, rot, pos);
+	cout <<"node pos("<< pos.x<<")(" <<pos.y<<")("<<pos.z<<")\n"<< endl; 
 	if (node->mNumMeshes>0)
 	{
+		SceneObject NewObject;
+		targetParent.transform = (NewObject.transform);
+		parent = NewObject;
 	}
 	else
 	{
-
+		parent = targetParent;
+		transform = node->mTransformation*accTransform;
 	}
-	cout << scene->mNumMeshes << endl;
-	cout << "cena processada" << endl;
+
+
+	for (size_t i = 0; i < node->mNumChildren; i++)
+	{
+		recursiveProcessNode(node->mChildren[i], parent, scene, transform);
+	}
 }
 
 void assimpInterface::loadModel(string modelPath)
@@ -28,7 +43,8 @@ void assimpInterface::loadModel(string modelPath)
 	if (scene)
 	{
 		aiMatrix4x4 accTransform;
-		processNode(scene, scene->mRootNode, accTransform);
+		SceneObject sceneObject;
+		recursiveProcessNode(scene->mRootNode, sceneObject, scene, accTransform);
 	}
 	else
 	{
