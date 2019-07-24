@@ -8,5 +8,6 @@ public:
 	vrayInterface();
 
 	~vrayInterface();
+
 };
 
