@@ -1,12 +1,19 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Engine/Texture2D.h"
 #include "rndrBPFunctionLibrary.generated.h"
 UCLASS()
 class RNDR_API UrndrBPFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintCallable, Category = "rndrPixel")
+		static FColor getPixel(UTexture2D*MyTexture2D, TArray<FColor>&outColor);
+
+
+
+
 	UFUNCTION(BlueprintPure, DisplayName = "IsNAN", Category = "rndr | Math", meta = (ToolTip = "Returns whether the supplied float is not a number."))
 		static bool BlueprintIsNAN(const float TestValue) { return FMath::IsNaN(TestValue); }
 
