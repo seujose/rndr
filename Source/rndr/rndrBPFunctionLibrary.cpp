@@ -1,17 +1,22 @@
 #include "rndrBPFunctionLibrary.h"
-FColor UrndrBPFunctionLibrary::getPixel(UTexture2D*MyTexture2D, TArray<FColor>&outColor)
-{
-	FTexture2DMipMap* MyMipMap = &MyTexture2D->PlatformData->Mips[0];
-	FByteBulkData* RawImageData = &MyMipMap->BulkData;
-	FColor* FormatedImageData = static_cast<FColor*>(RawImageData->Lock(LOCK_READ_ONLY));
-	uint8 PixelX = 5, PixelY = 10;
-	uint32 TextureWidth = MyMipMap->SizeX, TextureHeight = MyMipMap->SizeY;
-	FColor PixelColor;
+#include "Engine/Texture2D.h"
 
-	if (PixelX >= 0 && PixelX < TextureWidth && PixelY >= 0 && PixelY < TextureHeight)
-	{
-		PixelColor = FormatedImageData[PixelY * TextureWidth + PixelX];
-	}
+ 
 
-	return PixelColor;
+
+void UrndrBPFunctionLibrary::getPixel(UTexture2D*SourceTexture, UTexture2D*&finalTexture)
+{ 
+	FTexture2DMipMap*sourceMip = &SourceTexture->PlatformData->Mips[0];
+	FByteBulkData*sourceData = &sourceMip->BulkData;
+
+	UTexture2D*transientTexture = UTexture2D::CreateTransient(256, 256);
+
+	FTexture2DMipMap*destinationMip = &transientTexture->PlatformData->Mips[0];
+	FByteBulkData*destinationData = &destinationMip->BulkData;
+	destinationData->Lock(LOCK_READ_ONLY);
+
+	auto stride = (int32)(sizeof(uint8) * 4);
+	FMemory::Memcpy(destinationData, sourceData, 100 * 100*stride);
+	destinationData->Unlock();
+	finalTexture = transientTexture;
 }
