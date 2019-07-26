@@ -1,6 +1,6 @@
 #pragma once
-#include "vraysdk.hpp"
-#include "vrayplugins.hpp"
+//#include "vraysdk.hpp"
+//#include "vrayplugins.hpp"
 class vrayInterface
 {
 public:

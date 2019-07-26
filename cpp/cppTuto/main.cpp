@@ -1,16 +1,50 @@
-
-#include "vraysdk.hpp"
-#include "vrayplugins.hpp"
-#include "assimpInterface.h"
-#include "vrayInterface.h"
 #include <iostream>
-using namespace VRay;
-using namespace VRay::Plugins;
+using namespace std;
+
+void showMenu()
+{
+	cout << "1.search" << endl;
+	cout << "2.view record" << endl;
+	cout << "3.quit" << endl;
+}
+
+int  getInput()
+{
+	cout << "enter selection" << endl;
+	int input;
+	cin >> input;
+	return input;
+}
+
+void processSelection(int option)
+{
+	switch (option)
+	{
+	case 1:
+	{
+		cout << "searching..." << endl;
+	}
+	case 2:
+	{
+		cout << "viewing..." << endl;
+	}
+	case 3:
+	{
+		cout << "quiting..." << endl;
+	}
+	default:
+	{
+		cout << "please select an item frm the menu" << endl;
+	}
+	break;
+	}
+}
+
 
 int main()
 {
-	vrayInterface vrayInstance;
-	assimpInterface assimpInstance;
-	string thePath="C:\\Users\\master\\Documents\\3ds Max 2020\\export\\masterNode.fbx";
-	assimpInstance.loadModel(thePath);
+	showMenu();
+	int selection = getInput();
+	processSelection(selection);
+	return 0;
 }
