@@ -9,7 +9,7 @@ class RNDR_API UrndrBPFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = "rndrPixel")
-		static void getPixel(UTexture2D*SourceTexture,  UTexture2D*&DestinationTexture);
+		static void getPixel(UTexture2D*SourceTexture,  UTexture2D*&DestinationTexture, int32 pixelX, int32 pixelY, FColor&pixelColorOut);
 
 
 

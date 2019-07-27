@@ -1,22 +1,18 @@
 #include "rndrBPFunctionLibrary.h"
 #include "Engine/Texture2D.h"
 
- 
-
-
-void UrndrBPFunctionLibrary::getPixel(UTexture2D*SourceTexture, UTexture2D*&finalTexture)
+void UrndrBPFunctionLibrary::getPixel(UTexture2D*SourceTexture, UTexture2D*&DestinationTexture, int32 pixelX, int32 pixelY, FColor&pixelColorOut)
 { 
-	FTexture2DMipMap*sourceMip = &SourceTexture->PlatformData->Mips[0];
-	FByteBulkData*sourceData = &sourceMip->BulkData;
+	FTexture2DMipMap*MipMapFromSourceTexture = &SourceTexture->PlatformData->Mips[0];
 
-	UTexture2D*transientTexture = UTexture2D::CreateTransient(256, 256);
+	FUntypedBulkData*rawDataFromMip = &MipMapFromSourceTexture->BulkData;
 
-	FTexture2DMipMap*destinationMip = &transientTexture->PlatformData->Mips[0];
-	FByteBulkData*destinationData = &destinationMip->BulkData;
-	destinationData->Lock(LOCK_READ_ONLY);
+	FColor*castedFColorFromRawData = static_cast<FColor*>(rawDataFromMip->Lock(LOCK_READ_ONLY));
 
-	auto stride = (int32)(sizeof(uint8) * 4);
-	FMemory::Memcpy(destinationData, sourceData, 100 * 100*stride);
-	destinationData->Unlock();
-	finalTexture = transientTexture;
+	uint32 textureWidth = MipMapFromSourceTexture->SizeX, textureHeight = MipMapFromSourceTexture->SizeY;
+	FColor pixelColor;
+	pixelColor = castedFColorFromRawData[pixelY*textureWidth + pixelX];
+	pixelColorOut = pixelColor;
+
+	SourceTexture->PlatformData->Mips[0].BulkData.Unlock();
 }
