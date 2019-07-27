@@ -12,7 +12,7 @@ public class rndr : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",  "Slate", "SlateCore", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "RHI", "RenderCore", "Core", "CoreUObject", "Engine", "InputCore",  "Slate", "SlateCore", "UMG" });
         
         PrivateDependencyModuleNames.AddRange(new string[] {});
         PublicIncludePaths.AddRange(new string[] { "C:\\rndr\\Source\\assimp", "C:\\Program Files\\Chaos Group\\V-Ray\\AppSDK\\cpp\\include" });
