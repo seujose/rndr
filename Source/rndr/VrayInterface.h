@@ -28,7 +28,7 @@ public:
 	AVrayInterface();
 	VRay::VRayRenderer renderer;
 	UFUNCTION(BlueprintCallable, Category = "vray")
-		void getPixelDataaa();
+		void getPixelDataaa(uint8&outData);
 	UFUNCTION(BlueprintCallable, Category = "vray")
 		void getGeoInfo(FString PluginName, TArray<FVector>&VerticesOut, TArray<FVector>&NormalsOut,
 			TArray<int32>&FacesOut, TArray<int32>&facesNormalsOut, TArray<FVector2D>&UVZeroOut, TArray<FVector2D>&UVOneOut, TArray<int32>&mapChannelfacesOut);

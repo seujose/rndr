@@ -18,7 +18,7 @@ void fn_render(VRayRenderer&renderer, int32 renderMode, int32 timeToStop, float 
 	vfb.setPositionAndSize(1287, 448, 640, 640);         // Position in screen-space and size in pixels
 	vfb.enableInteractivity(true);
 	vfb.setAlwaysOnTop(true);
-	renderer.setImageSize(512, 512, true, true);
+	renderer.setImageSize(256, 256, true, true);
 
 	SettingsRTEngine settingsRTEngine = renderer.getInstanceOrCreate<SettingsRTEngine>();
 	settingsRTEngine.set_undersampling(5);
@@ -669,13 +669,10 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
-void AVrayInterface::getPixelDataaa()
+void AVrayInterface::getPixelDataaa(uint8&outData)
 {
 
 	RenderElement rawBuffer = renderer.getRenderElements().get(RenderElement::DIFFUSE);
-	/*string basePath = "C:/rndr/baked_";
-	string baseName = string(TCHAR_TO_UTF8(*nodeName));
-	string finalPath = basePath + baseName + "_" + rawBuffer.getName() + ".png";*/
 	fn_render(renderer, 1, 5000, 0.1);
 	renderer.waitForRenderEnd();
 	if (rawBuffer)
@@ -684,14 +681,12 @@ void AVrayInterface::getPixelDataaa()
 		VRayImage *image = rawBuffer.getImage();
 		if (image)
 		{
-			size_t count;
-			image->getPixelData(count);
-			image->toBitmapData(count);
-			//AColor theColor(image->getPixelData());
-			/*MemoryBuffer*teste;
-			size_t t;
-			image->toBitmapData(t, false, false, false, 0);
-			delete image;*/
+			//image->getPixelData(data);
+			//se valor uint nao retornar corretamente, tentar retornar sizeT
+			size_t data;
+			image->toBitmapData(data);
+			uint8 *tempOutData =(uint8*)&data;
+			outData = *tempOutData;
 		}
 	}
 }
