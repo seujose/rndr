@@ -670,28 +670,26 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
-void AVrayInterface::getPixelDataaa(UTexture2D*&outTexture)
+void AVrayInterface::getRawImage(UTexture2D*&outTexture, bool preserveAlpha/*=true*/)
 {
 	VRayImage *image = renderer.getImage();
 	if (image)
 	{
-		size_t sizeOuttT=0;
+		size_t bufferSize=0;
 		int32 imgSizeW, imgSizeH;
 		image->getSize(imgSizeW, imgSizeH);
-		UTexture2D *ut2 = UTexture2D::CreateTransient(imgSizeW, imgSizeH);//falta pixel format
-		ut2->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-		ut2->SRGB = 0;
-		ut2->AddToRoot();
-		ut2->UpdateResource();
-		FTexture2DMipMap &mip = ut2->PlatformData->Mips[0];
+		UTexture2D *tempTexture = UTexture2D::CreateTransient(imgSizeW, imgSizeH);//falta pixel format
+		//tempTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+		//tempTexture->SRGB = 0;
+		tempTexture->AddToRoot();
+		tempTexture->UpdateResource();
+		FTexture2DMipMap &mip = tempTexture->PlatformData->Mips[0];
 		void *data = mip.BulkData.Lock(LOCK_READ_WRITE);
-		image->toBitmapData(sizeOuttT);
-		FMemory::Memcpy(data, image->toBitmapData(sizeOuttT, true, true, true), sizeOuttT);
+		image->toBitmapData(bufferSize);
+		FMemory::Memcpy(data, image->toBitmapData(bufferSize, preserveAlpha, false, false), bufferSize);
 		mip.BulkData.Unlock();
-		ut2->UpdateResource();
-		outTexture = ut2;
-		//free(data);
-		//data = NULL;
+		tempTexture->UpdateResource();
+		outTexture = tempTexture;
 	}
 }
 
