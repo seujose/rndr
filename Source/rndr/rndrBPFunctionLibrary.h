@@ -11,6 +11,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "rndrPixel")
 		static void getPixel(UTexture2D*SourceTexture,  UTexture2D*&DestinationTexture, int32 pixelX, int32 pixelY, FColor&pixelColorOut);
 
+	UFUNCTION(BlueprintCallable, Category = "rndrPixel")
+		static void newGetPixel(UTexture2D*SourceTexture, UTexture2D*&DestinationTexture, int32 pixelX, int32 pixelY, FColor&pixelColorOut);
+
 	UFUNCTION(BlueprintPure, DisplayName = "IsNAN", Category = "rndr | Math", meta = (ToolTip = "Returns whether the supplied float is not a number."))
 		static bool BlueprintIsNAN(const float TestValue) { return FMath::IsNaN(TestValue); }
 
