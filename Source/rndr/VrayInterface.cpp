@@ -4,6 +4,7 @@
 #include "vrayplugins.hpp"
 #include <vector>
 #include <string>
+#include "Engine/Texture2D.h"
 #include "VrayInterface.h"
 using namespace VRay;
 using namespace VRay::Plugins;
@@ -669,26 +670,28 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 	}
 }
 
-void AVrayInterface::getPixelDataaa(uint8&outData)
+void AVrayInterface::getPixelDataaa(UTexture2D*&outTexture)
 {
-	RenderElements renderElementsManager = renderer.getRenderElements();
-	if ((renderElementsManager.getAll(RenderElement::DIFFUSE).size()) == 0)
+	VRayImage *image = renderer.getImage();
+	if (image)
 	{
-		renderElementsManager.add(RenderElement::DIFFUSE, NULL, NULL);
-	}
-	RenderElement diffuseElement = renderer.getRenderElements().get(RenderElement::DIFFUSE);
-	fn_render(renderer, 1, 5000, 0.1);
-	renderer.waitForRenderEnd();
-	if (diffuseElement)
-	{
-		Plugin diffuseElementPlugin = diffuseElement.getPlugin();
-		VRayImage *image = diffuseElement.getImage();
-		if (image)
-		{
-			size_t data;
-			uint8 *tempOutData = (uint8*)image->toBitmapData(data)->getData();
-			outData = *(uint8*)image->toBitmapData(data)->getData();
-		}
+		size_t sizeOuttT=0;
+		int32 imgSizeW, imgSizeH;
+		image->getSize(imgSizeW, imgSizeH);
+		UTexture2D *ut2 = UTexture2D::CreateTransient(imgSizeW, imgSizeH);//falta pixel format
+		ut2->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+		ut2->SRGB = 0;
+		ut2->AddToRoot();
+		ut2->UpdateResource();
+		FTexture2DMipMap &mip = ut2->PlatformData->Mips[0];
+		void *data = mip.BulkData.Lock(LOCK_READ_WRITE);
+		image->toBitmapData(sizeOuttT);
+		FMemory::Memcpy(data, image->toBitmapData(sizeOuttT, true, true, true), sizeOuttT);
+		mip.BulkData.Unlock();
+		ut2->UpdateResource();
+		outTexture = ut2;
+		//free(data);
+		//data = NULL;
 	}
 }
 
