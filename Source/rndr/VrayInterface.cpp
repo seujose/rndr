@@ -671,22 +671,23 @@ void AVrayInterface::GetVrayNodeNames(TArray<FString>&PluginType, TArray<FString
 
 void AVrayInterface::getPixelDataaa(uint8&outData)
 {
-
-	RenderElement rawBuffer = renderer.getRenderElements().get(RenderElement::DIFFUSE);
+	RenderElements renderElementsManager = renderer.getRenderElements();
+	if ((renderElementsManager.getAll(RenderElement::DIFFUSE).size()) == 0)
+	{
+		renderElementsManager.add(RenderElement::DIFFUSE, NULL, NULL);
+	}
+	RenderElement diffuseElement = renderer.getRenderElements().get(RenderElement::DIFFUSE);
 	fn_render(renderer, 1, 5000, 0.1);
 	renderer.waitForRenderEnd();
-	if (rawBuffer)
+	if (diffuseElement)
 	{
-		Plugin rawLithPlugin = rawBuffer.getPlugin();
-		VRayImage *image = rawBuffer.getImage();
+		Plugin diffuseElementPlugin = diffuseElement.getPlugin();
+		VRayImage *image = diffuseElement.getImage();
 		if (image)
 		{
-			//image->getPixelData(data);
-			//se valor uint nao retornar corretamente, tentar retornar sizeT
 			size_t data;
-			image->toBitmapData(data);
-			uint8 *tempOutData =(uint8*)&data;
-			outData = *tempOutData;
+			uint8 *tempOutData = (uint8*)image->toBitmapData(data)->getData();
+			outData = *(uint8*)image->toBitmapData(data)->getData();
 		}
 	}
 }
